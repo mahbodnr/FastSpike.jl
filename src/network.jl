@@ -1,30 +1,32 @@
 using CUDA
 CUDA.allowscalar(false)
-import ..FastSpike: LearningRule, NeuronType, pad1D, pad2D
-
+using ..FastSpike: NeuronType, LearningRule, pad1D, pad2D
+# include("learning_rules.jl")
+# include("neuron.jl")
+# include("utils.jl")
 mutable struct Network
         neurons::NeuronType
-        learning_rule::LearningRule
         batch_size::UInt
+        learning_rule::Union{LearningRule, Nothing}
         weight::CuArray
         adjacency::CuArray
         spikes::CuArray
         voltage::CuArray
         refractory::CuArray
-        e₊::CuArray
-        e₋::CuArray
+        e₊::Union{CuArray, Nothing}
+        e₋::Union{CuArray, Nothing}
         learning::Bool
 
         function Network(
                 neurons::NeuronType,
-                learning_rule::LearningRule,
                 batch_size::Int,
+                learning_rule::LearningRule,
                 )
                 if learning_rule.τ₊ == learning_rule.τ₋
                         new(
                         neurons,
-                        learning_rule,
                         batch_size,
+                        learning_rule,
                         CuArray{Float64}(undef,(0,0)),
                         CuArray{Float64}(undef,(0,0)),
                         CUDA.zeros(Bool,batch_size,0),
@@ -37,8 +39,8 @@ mutable struct Network
                 else
                         new(
                         neurons,
-                        learning_rule,
                         batch_size,
+                        learning_rule,
                         CuArray{Float64}(undef,(0,0)),
                         CuArray{Float64}(undef,(0,0)),
                         CUDA.zeros(Bool,batch_size,0),
@@ -57,8 +59,8 @@ mutable struct Network
                 )
                 new(
                 neurons,
-                nothing,
                 batch_size,
+                nothing,
                 CuArray{Float64}(undef,(0,0)),
                 CuArray{Float64}(undef,(0,0)),
                 CUDA.zeros(Bool,batch_size,0),
@@ -77,8 +79,12 @@ function add_group!(network::Network, N::Int)
 
         network.weight = pad2D(network.weight, N)
         network.adjacency = pad2D(network.adjacency, N)
-        network.eligibility = pad2D(network.eligibility, N)
-
+        if network.e₊ != nothing
+                network.e₊ = pad2D(network.e₊, N)
+        end
+        if network.e₋ != nothing
+                network.e₋ = pad2D(network.e₋, N)
+        end
         network.spikes = pad1D(network.spikes, N)
         network.voltage = pad1D(network.voltage, N)
         network.refractory = pad1D(network.refractory, N)
@@ -144,8 +150,13 @@ end
 function reset(network::Network)
         fill!(network.spikes, 0)
         fill!(network.voltage, 0)
-        fill!(network.eligibility, 0)
         fill!(network.refractory, 0)
+        if network.e₊ != nothing
+                fill!(network.e₊, 0)
+        end
+        if network.e₋ != nothing
+                fill!(network.e₋, 0)
+        end
 end
 
 

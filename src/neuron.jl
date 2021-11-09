@@ -1,3 +1,5 @@
+export NeuronType, LIF, NeuronGroup
+
 abstract type NeuronType end
 
 struct LIF <: NeuronType

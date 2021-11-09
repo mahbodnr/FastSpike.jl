@@ -1,3 +1,5 @@
+using CUDA
+
 function pad1D(X::CuArray, n::Int)
         return [X CUDA.zeros(eltype(X), (size(X,1),n))]
 end
