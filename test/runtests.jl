@@ -2,5 +2,5 @@ using FastSpike
 using Test
 
 @testset "FastSpike.jl" begin
-    # Write your tests here.
+    net = Network(LIF(1), 1)
 end
