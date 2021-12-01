@@ -112,7 +112,7 @@ function connect!(
         weight::AbstractArray,
 )
         network.weight[source.idx, target.idx] = weight
-        network.adjacency[source.idx, target.idx] = CUDA.ones(Bool, source.n, target.n)
+        network.adjacency[source.idx, target.idx] = ones(Bool, source.n, target.n)
 end
 
 
