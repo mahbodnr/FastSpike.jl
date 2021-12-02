@@ -125,7 +125,7 @@ function run!(network::Network, input_spikes::AbstractArray{Bool,2}, input_volta
                 network.neurons.v_rest
         )
         # External voltage:
-        input_voltage[network.refractory.>0] = 0.0
+        input_voltage[network.refractory.>0] .= 0.0
         network.voltage += input_voltage
         # Evoke spikes
         network.spikes = network.voltage .>= network.neurons.v_thresh
@@ -133,11 +133,11 @@ function run!(network::Network, input_spikes::AbstractArray{Bool,2}, input_volta
         network.spikes = network.spikes .| input_spikes
         # update voltages
         network.voltage += network.spikes * network.weight  # + network.bias
-        network.voltage[network.refractory.>0] = network.neurons.v_rest # reset the voltage of the neurons in the refractory period
-        network.voltage[network.spikes] = network.neurons.v_reset  # change the voltage of spiked neurons to v_reset
+        network.voltage[network.refractory.>0] .= network.neurons.v_rest # reset the voltage of the neurons in the refractory period
+        network.voltage[network.spikes] .= network.neurons.v_reset  # change the voltage of spiked neurons to v_reset
         # Update refractory timepoints
         network.refractory .-= network.neurons.dt
-        network.refractory[network.spikes] = network.neurons.refractory_period
+        network.refractory[network.spikes] .= network.neurons.refractory_period
         # Learning process
         if network.learning # Apply the learning rule and update weights
                 train!(network, network.learning_rule)
