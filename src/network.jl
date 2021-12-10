@@ -83,6 +83,7 @@ function add_group!(network::Network, N::Int)
         end
         network.spikes = pad1D(network.spikes, N)
         network.voltage = pad1D(network.voltage, N)
+        fill!(network.voltage, network.neurons.v_rest)
         network.refractory = pad1D(network.refractory, N)
 
         return Group
@@ -101,6 +102,7 @@ function connect!(
 )
         network.weight[source.idx, target.idx] = weight
         network.adjacency[source.idx, target.idx] = adjacency
+        return
 end
 
 function connect!(
@@ -111,6 +113,7 @@ function connect!(
 )
         network.weight[source.idx, target.idx] = weight
         network.adjacency[source.idx, target.idx] = ones(Bool, source.n, target.n)
+        return
 end
 
 
@@ -125,14 +128,14 @@ function run!(network::Network, input_spikes::AbstractArray{Bool,2}, input_volta
         # External voltage:
         input_voltage[network.refractory.>0] .= 0.0
         network.voltage += input_voltage
-        # Evoke spikes
-        network.spikes = network.voltage .>= network.neurons.v_thresh
-        # External spikes
-        network.spikes = network.spikes .| input_spikes
         # update voltages
         network.voltage += network.spikes * network.weight  # + network.bias
         network.voltage[network.refractory.>0] .= network.neurons.v_rest # reset the voltage of the neurons in the refractory period
         network.voltage[network.spikes] .= network.neurons.v_reset  # change the voltage of spiked neurons to v_reset
+        # Evoke spikes
+        network.spikes = network.voltage .>= network.neurons.v_thresh
+        # External spikes
+        network.spikes = network.spikes .| input_spikes
         # Update refractory timepoints
         network.refractory .-= network.neurons.dt
         network.refractory[network.spikes] .= network.neurons.refractory_period
@@ -155,6 +158,7 @@ function reset(network::Network)
         if network.e₋ !== nothing
                 fill!(network.e₋, 0)
         end
+        return
 end
 
 
