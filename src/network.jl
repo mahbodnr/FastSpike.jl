@@ -1,10 +1,9 @@
 using ..FastSpike: NeuronType, LearningRule, pad1D, pad2D
-# include("learning_rules.jl")
-# include("neuron.jl")
-# include("utils.jl")
+
+export Network
 mutable struct Network
         neurons::NeuronType
-        batch_size::UInt
+        batch_size::Int
         learning_rule::Union{LearningRule,Nothing}
         weight::AbstractArray
         adjacency::AbstractArray
@@ -14,63 +13,62 @@ mutable struct Network
         e₊::Union{AbstractArray,Nothing}
         e₋::Union{AbstractArray,Nothing}
         learning::Bool
+end
 
-        function Network(
-                neurons::NeuronType,
-                batch_size::Int,
-                learning_rule::LearningRule,
+function Network(
+        neurons::NeuronType,
+        batch_size::Int
+)
+        return Network(
+                neurons,
+                batch_size,
+                nothing,
+                Array{Float64}(undef, (0, 0)),
+                Array{Float64}(undef, (0, 0)),
+                zeros(Bool, batch_size, 0),
+                ones(Float64, batch_size, 0),
+                zeros(Int64, batch_size, 0),
+                nothing,
+                nothing,
+                false,
         )
-                if learning_rule.τ₊ == learning_rule.τ₋
-                        new(
-                                neurons,
-                                batch_size,
-                                learning_rule,
-                                Array{Float64}(undef, (0, 0)),
-                                Array{Float64}(undef, (0, 0)),
-                                zeros(Bool, batch_size, 0),
-                                ones(Float64, batch_size, 0),
-                                zeros(Int64, batch_size, 0),
-                                Array{Float64}(undef, (0, 0)),
-                                nothing,
-                                true,
-                        )
-                else
-                        new(
-                                neurons,
-                                batch_size,
-                                learning_rule,
-                                Array{Float64}(undef, (0, 0)),
-                                Array{Float64}(undef, (0, 0)),
-                                zeros(Bool, batch_size, 0),
-                                ones(Float64, batch_size, 0),
-                                zeros(Int64, batch_size, 0),
-                                Array{Float64}(undef, (0, 0)),
-                                Array{Float64}(undef, (0, 0)),
-                                true,
-                        )
-                end
-        end
+end
 
-        function Network(
-                neurons::NeuronType,
-                batch_size::Int,
-        )
-                new(
+function Network(
+        neurons::NeuronType,
+        batch_size::Int,
+        learning_rule::Union{LearningRule,Nothing}
+)
+        if learning_rule.τ₊ == learning_rule.τ₋
+                return Network(
                         neurons,
                         batch_size,
-                        nothing,
+                        learning_rule,
                         Array{Float64}(undef, (0, 0)),
                         Array{Float64}(undef, (0, 0)),
                         zeros(Bool, batch_size, 0),
                         ones(Float64, batch_size, 0),
                         zeros(Int64, batch_size, 0),
+                        zeros(Bool, batch_size, 0),
                         nothing,
-                        nothing,
-                        false,
+                        true,
+                )
+        else
+                return Network(
+                        neurons,
+                        batch_size,
+                        learning_rule,
+                        Array{Float64}(undef, (0, 0)),
+                        Array{Float64}(undef, (0, 0)),
+                        zeros(Bool, batch_size, 0),
+                        ones(Float64, batch_size, 0),
+                        zeros(Int64, batch_size, 0),
+                        zeros(Bool, batch_size, 0),
+                        zeros(Bool, batch_size, 0),
+                        true,
                 )
         end
 end
-
 
 function add_group!(network::Network, N::Int)
         Group = NeuronGroup(N, size(network.weight, 1)+1:size(network.weight, 1)+N)
@@ -78,10 +76,10 @@ function add_group!(network::Network, N::Int)
         network.weight = pad2D(network.weight, N)
         network.adjacency = pad2D(network.adjacency, N)
         if network.e₊ !== nothing
-                network.e₊ = pad2D(network.e₊, N)
+                network.e₊ = pad1D(network.e₊, N)
         end
         if network.e₋ !== nothing
-                network.e₋ = pad2D(network.e₋, N)
+                network.e₋ = pad1D(network.e₋, N)
         end
         network.spikes = pad1D(network.spikes, N)
         network.voltage = pad1D(network.voltage, N)
@@ -142,6 +140,7 @@ function run!(network::Network, input_spikes::AbstractArray{Bool,2}, input_volta
         if network.learning # Apply the learning rule and update weights
                 train!(network, network.learning_rule)
         end
+        return network.spikes, network.voltage
 end
 
 
@@ -159,32 +158,3 @@ function reset(network::Network)
 end
 
 
-
-function train!(network::Network, learning_rule::STDP)
-        if learning_rule.τ₊ == learning_rule.τ₋
-                SymmetricalSTDP!(network, learning_rule)
-        else
-                AsymmetricalSTDP!(network, learning_rule)
-        end
-end
-
-function SymmetricalSTDP!(network::Network, learning_rule::STDP)
-        network.e₊ *= exp(-network.neurons.dt / learning_rule.τ₊)
-        if network.neurons.traces_additive
-                network.e₊ += network.neurons.trace_scale * network.spikes
-        else
-                network.e₊[network.spikes] = network.neurons.trace_scale
-        end
-end
-
-function AsymmetricalSTDP!(network::Network, learning_rule::STDP)
-        network.e₊ *= exp(-network.neurons.dt / learning_rule.τ₊)
-        network.e₋ *= exp(-network.neurons.dt / learning_rule.τ₋)
-        if network.neurons.traces_additive
-                network.e₊ += network.neurons.trace_scale * network.spikes
-                network.e₋ += network.neurons.trace_scale * network.spikes
-        else
-                network.e₊[network.spikes] = network.neurons.trace_scale
-                network.e₋[network.spikes] = network.neurons.trace_scale
-        end
-end

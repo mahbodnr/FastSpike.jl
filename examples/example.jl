@@ -1,7 +1,7 @@
 using FastSpike
 use_gpu = false
 
-net = Network(LIF(1), 1)
+net = Network(LIF(1), 1, STDP(1, 1, 1, 1))
 g1 = add_group!(net, 3)
 g2 = add_group!(net, 2)
 
@@ -15,7 +15,8 @@ adj = zeros((2, 2))
 adj[1, 2] = 1
 connect!(net, g2, g3, w, adj)
 
-s = ones(Bool, (1, 7))
+s = zeros(Bool, (1, 7))
+s[1, 2] = 1
 v = ones((1, 7))
 
 if use_gpu
