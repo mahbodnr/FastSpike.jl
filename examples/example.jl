@@ -1,26 +1,28 @@
 using FastSpike
 using LinearAlgebra: I
+using Plots
 
-time = 100
-layer_size = 10
-inner_weight = 0.5
-weight_scale = 5
-
+const time = 100
+const N = 20
+const input_dim = 5
+# Define Network
 net = Network(LIF(1), 1, STDP(1.0, 1.0, 20, 20))
-g1 = add_group!(net, layer_size)
-g2 = add_group!(net, layer_size)
-w1 = transpose(reshape([1:layer_size^2;], layer_size, :)) / (layer_size^2 / weight_scale)
-connect!(net, g1, g2, w1)
-w2 = inner_weight * (ones(layer_size, layer_size) - I)
-connect!(net, g2, g2, w2)
+input = add_group!(net, input_dim)
+neurons = add_group!(net, N)
+# input to neurons
+adjacency = rand(0:1, input_dim, N)
+weights = rand(input_dim, N) .* adjacency
+connect!(net, input, neurons, weights, adjacency)
+# connections in neural group
+adjacency = ones(N, N) - I
+weights = rand(N, N) .* adjacency
+connect!(net, neurons, neurons, weights, adjacency)
 net.weight
-for t = 0:time
-    s = zeros(Bool, (1, layer_size * 2))
-    s[1, t%layer_size+1] = 1
-    v = zeros((1, layer_size * 2))
-    run!(net, s, v)
-    println(t, net.spikes[1:layer_size], net.spikes[layer_size+1:end], net.voltage[end])
+# Generate input spikes
+input_spikes = convert(Matrix{Bool}, [rand(0:1, time, input_dim) zeros(time, N)])
+# Run
+histogram(collect(Iterators.flatten(net.weight)))
+for t = 1:time
+    run!(net, input_spikes = reshape(input_spikes[t, :], 1, :))
+    display(histogram(collect(Iterators.flatten(net.weight))))
 end
-
-net.weight[1:10, 11:end]
-net.weight[11:end, 11:end]
