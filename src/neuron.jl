@@ -15,13 +15,13 @@ struct LIF <: NeuronType
     function LIF(dt::Int)
         new(
             UInt(dt),
-            -52.,
-            -65.,
-            -65.,
-            1.,
+            -52.0,
+            -65.0,
+            -65.0,
+            1.0,
             false,
             5,
-            exp(-dt/20)
+            exp(-dt / 100)
         )
     end
 end

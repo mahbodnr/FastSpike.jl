@@ -7,6 +7,6 @@ include("learning_rules.jl")
 include("neuron.jl")
 include("utils.jl")
 include("network.jl")
-include("training.jl")
+include("learning.jl")
 
 end

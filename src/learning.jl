@@ -7,13 +7,16 @@ function train!(network::Network, learning_rule::STDP)
     else
         AsymmetricalSTDP!(network, learning_rule)
     end
-    s = reshape(network.spikes, network.batch_size, :, 1)
-    e₊ = reshape(network.e₊, network.batch_size, 1, :)
+    s₊ = reshape(network.spikes, network.batch_size, 1, :)
+    e₊ = reshape(network.e₊, network.batch_size, :, 1)
+    s₋ = reshape(network.spikes, network.batch_size, :, 1)
     e₋ = reshape(network.e₊, network.batch_size, 1, :)
-    w = network.weight
-    @einsum weight_update[i, j] := s[batch, i, x] * e₊[batch, x, j] * w[i, j]
-    @einsum weight_update[i, j] += s[batch, i, x] * e₋[batch, x, j] * w[i, j]
-    network.weight += weight_update
+    # Pre-Post activities
+    @einsum weight_update[i, j] := e₊[batch, i, x] * s₊[batch, x, j] # *w[i, j]
+    # Post-Pre activities
+    @einsum weight_update[i, j] -= s₋[batch, i, x] * e₋[batch, x, j] # *w[i, j]
+    network.weight += weight_update .* network.adjacency
+    return
 end
 
 function SymmetricalSTDP!(network::Network, learning_rule::STDP)
@@ -23,6 +26,8 @@ function SymmetricalSTDP!(network::Network, learning_rule::STDP)
     else
         network.e₊[network.spikes] .= network.neurons.trace_scale
     end
+    network.e₋ = network.e₊
+    return
 end
 
 function AsymmetricalSTDP!(network::Network, learning_rule::STDP)
@@ -35,4 +40,5 @@ function AsymmetricalSTDP!(network::Network, learning_rule::STDP)
         network.e₊[network.spikes] .= network.neurons.trace_scale
         network.e₋[network.spikes] .= network.neurons.trace_scale
     end
+    return
 end

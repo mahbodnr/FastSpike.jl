@@ -1,26 +1,26 @@
 using FastSpike
-use_gpu = false
+using LinearAlgebra: I
 
-net = Network(LIF(1), 1, STDP(1, 1, 1, 1))
-g1 = add_group!(net, 3)
-g2 = add_group!(net, 2)
+time = 100
+layer_size = 10
+inner_weight = 0.5
+weight_scale = 5
 
-g3 = add_group!(net, 2)
-
-w = ones((3, 2)) .* 0.5
-connect!(net, g1, g2, w)
-
-w = ones((2, 2)) .* -0.5
-adj = zeros((2, 2))
-adj[1, 2] = 1
-connect!(net, g2, g3, w, adj)
-
-s = zeros(Bool, (1, 7))
-s[1, 2] = 1
-v = ones((1, 7))
-
-if use_gpu
-    net = net |> gpu
+net = Network(LIF(1), 1, STDP(1.0, 1.0, 20, 20))
+g1 = add_group!(net, layer_size)
+g2 = add_group!(net, layer_size)
+w1 = transpose(reshape([1:layer_size^2;], layer_size, :)) / (layer_size^2 / weight_scale)
+connect!(net, g1, g2, w1)
+w2 = inner_weight * (ones(layer_size, layer_size) - I)
+connect!(net, g2, g2, w2)
+net.weight
+for t = 0:time
+    s = zeros(Bool, (1, layer_size * 2))
+    s[1, t%layer_size+1] = 1
+    v = zeros((1, layer_size * 2))
+    run!(net, s, v)
+    println(t, net.spikes[1:layer_size], net.spikes[layer_size+1:end], net.voltage[end])
 end
 
-run!(net, s, v)
+net.weight[1:10, 11:end]
+net.weight[11:end, 11:end]
