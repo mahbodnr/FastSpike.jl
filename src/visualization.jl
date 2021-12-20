@@ -3,6 +3,13 @@ using PlotlyJS
 using GraphPlot
 using Graphs
 
+struct NetworkView
+    pos_x::AbstractArray
+    pos_y::AbstractArray
+    edge_x::AbstractArray
+    edge_y::AbstractArray
+end
+
 function vertical_layout(g)
     return zeros(nv(g)), range(-1, 1; length = nv(g))
 end
@@ -11,9 +18,7 @@ function horizental_layout(g)
     return range(-1, 1; length = nv(g)), zeros(nv(g))
 end
 
-function plotNetwork(network::Network, groups, layouts,
-    spikes = network.spikes, voltage = network.voltage;
-    x_distance = 1.5)
+function networkView(network::Network, groups, layouts; x_distance = 1.5)
     x_loc = 0
     pos_x = []
     pos_y = []
@@ -48,11 +53,15 @@ function plotNetwork(network::Network, groups, layouts,
         push!(edge_y, pos_y[dst(edge)])
     end
 
+    return NetworkView(pos_x, pos_y, edge_x, edge_y)
+end
+
+function plotNetwork(view::NetworkView, spikes::AbstractVector, voltage::AbstractVector)
     # Create edges
     edges_trace = scatter(
         mode = "lines",
-        x = edge_x,
-        y = edge_y,
+        x = view.edge_x,
+        y = view.edge_y,
         line = attr(
             width = 0.5,
             color = "#888"
@@ -61,14 +70,14 @@ function plotNetwork(network::Network, groups, layouts,
 
     # Create nodes
     nodes_trace = scatter(
-        x = pos_x,
-        y = pos_y,
+        x = view.pos_x,
+        y = view.pos_y,
         mode = "markers",
-        text = ["N: $i  Voltage: $(round(voltage, digits = 2))v" for (i, voltage) in enumerate(reshape(voltage, :))],
+        text = ["N: $i  Voltage: $(round(voltage, digits = 2))v" for (i, voltage) in enumerate(voltage)],
         marker = attr(
             showscale = true,
             colorscale = colors.imola,
-            color = float(reshape(spikes, :)),
+            color = float(spikes),
             size = 10,
         )
     )

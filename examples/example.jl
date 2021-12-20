@@ -7,7 +7,7 @@ const time = 100
 const N = 20
 const input_dim = 5
 # Define Network
-net = Network(LIF(1), 1, STDP(1e-2, 1e-4, 20, 10))
+net = Network(LIF(1), 2, STDP(1e-2, 1e-4, 20, 10))
 input = add_group!(net, input_dim)
 neurons = add_group!(net, N)
 # input to neurons
@@ -19,6 +19,8 @@ adjacency = ones(N, N) - I
 weights = rand(N, N) .* adjacency
 connect!(net, neurons, neurons, weights, adjacency)
 net.weight
+# Define Monitor to record network activities
+monitor = Monitor()
 #plot weights histogram
 plot_weights(activity, active_neurons) = display(
     plot(
@@ -33,16 +35,18 @@ plot_weights(activity, active_neurons) = display(
 function train(time)
     # Generate input spikes
     input_spikes = convert(Matrix{Bool}, [rand(0:1, time, input_dim) zeros(time, N)])
-    activity = []
     active_neurons = []
     @showprogress 1 "training " for t = 1:time
         run!(net, input_spikes = reshape(input_spikes[t, :], 1, :), softbound = true, min_weight = 0, max_weight = 1)
-        push!(activity, sum(net.spikes[neurons.idx]))
+        record!(monitor, net)
         append!(active_neurons, [(t, i[2]) for i in findall(net.spikes)])
-        plot_weights(activity, Tuple.(active_neurons))
+        plot_weights(sum(monitor.spikes[:, 1, neurons.idx], dims = 2), Tuple.(active_neurons))
     end
 end
 # Run
 plot_weights([], [])
 train(time)
-plotNetwork(net, [input, neurons], ["vertical", "spring"])
+view = networkView(net, [input, neurons], ["vertical", "spring"])
+s = sum(monitor.spikes[:, 1, :], dims = 1)[1, :]
+s[input.idx] .= 0
+plotNetwork(view, s, net.voltage[1, :])
