@@ -120,7 +120,8 @@ end
 function run!(
         network::Network;
         input_spikes::Union{AbstractMatrix{Bool},Nothing} = nothing,
-        input_voltage::Union{AbstractMatrix,Nothing} = nothing
+        input_voltage::Union{AbstractMatrix,Nothing} = nothing,
+        min_weight = -Inf, max_weight = Inf, softbound = false
 )
         # Decay voltages.
         network.voltage = (
@@ -149,7 +150,8 @@ function run!(
         network.refractory[network.spikes] .= network.neurons.refractory_period
         # Learning process
         if network.learning # Apply the learning rule and update weights
-                train!(network, network.learning_rule)
+                train!(network, network.learning_rule;
+                        min_weight = min_weight, max_weight = max_weight, softbound = softbound)
         end
         return network.spikes, network.voltage
 end
