@@ -1,7 +1,8 @@
-using ..FastSpike: Network
+using ..FastSpike: Network, Monitor
 using PlotlyJS
 using GraphPlot
 using Graphs
+using Statistics
 
 struct NetworkView
     pos_x::AbstractArray
@@ -18,7 +19,7 @@ function horizental_layout(g)
     return range(-1, 1; length = nv(g)), zeros(nv(g))
 end
 
-function networkView(network::Network, groups, layouts; x_distance = 1.5)
+function networkView(network::Network, groups, layouts; x_distance = 2.5, max_iter = 100)
     x_loc = 0
     pos_x = []
     pos_y = []
@@ -29,7 +30,7 @@ function networkView(network::Network, groups, layouts; x_distance = 1.5)
         elseif layout == "horizental"
             graph_x, graph_y = horizental_layout(subgraph)
         elseif layout == "spring"
-            graph_x, graph_y = spring_layout(subgraph)
+            graph_x, graph_y = spring_layout(subgraph, MAXITER = max_iter)
         else
             error("$layout layout not supported")
         end
@@ -95,4 +96,11 @@ function plotNetwork(view::NetworkView, spikes::AbstractVector, voltage::Abstrac
         )
     )
 
+end
+
+function plotNetwork(view::NetworkView, monitor::Monitor, batch::Int = 1)
+    plotNetwork(view,
+        sum(monitor.spikes[:, batch, :], dims = 1)[1, :],
+        mean(monitor.voltage[:, batch, :], dims = 1)[1, :]
+    )
 end

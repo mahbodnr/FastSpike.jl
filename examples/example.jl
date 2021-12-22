@@ -20,7 +20,7 @@ weights = rand(N, N) .* adjacency
 connect!(net, neurons, neurons, weights, adjacency)
 net.weight
 # Define Monitor to record network activities
-monitor = Monitor()
+monitor = Monitor(net)
 #plot weights histogram
 plot_weights(activity, active_neurons) = display(
     plot(
@@ -38,7 +38,7 @@ function train(time)
     active_neurons = []
     @showprogress 1 "training " for t = 1:time
         run!(net, input_spikes = reshape(input_spikes[t, :], 1, :), softbound = true, min_weight = 0, max_weight = 1)
-        record!(monitor, net)
+        record!(monitor)
         append!(active_neurons, [(t, i[2]) for i in findall(net.spikes)])
         plot_weights(sum(monitor.spikes[:, 1, neurons.idx], dims = 2), Tuple.(active_neurons))
     end

@@ -1,4 +1,4 @@
-using ..FastSpike: NeuronType, LearningRule, pad1D, pad2D
+using ..FastSpike: NeuronType, LearningRule, pad1D, pad2D, Connection
 
 export Network
 mutable struct Network
@@ -116,6 +116,14 @@ function connect!(
         return
 end
 
+function connect!(
+        network::Network,
+        source::NeuronGroup,
+        target::NeuronGroup, 
+        connection::Connection,   
+)
+        connect!(network, source, target, connection.weight, connection.adjacency)
+end
 
 function run!(
         network::Network;
