@@ -1,7 +1,7 @@
 module FastSpike
 
 export  add_group!, connect!, run!, train!, pad1D, pad2D, record!, plotNetwork, networkView,
-        randomConnection
+        randomConnection, regularActivity, randomActivity
 export Network, LearningRule, NeuronType, NeuronGroup, LIF, STDP, Monitor, Connection
 
 include("utils.jl")

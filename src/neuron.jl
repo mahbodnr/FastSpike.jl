@@ -25,5 +25,7 @@ end
 
 struct NeuronGroup
     n::Int
-    idx::UnitRange{Int64}
+    idx::Union{UnitRange{Int64}, Vector{Int64}}
 end
+
+Base.:+(A::NeuronGroup, B::NeuronGroup)= NeuronGroup(A.n+B.n, sort([A.idx; B.idx]))

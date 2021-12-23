@@ -84,7 +84,7 @@ function plotNetwork(view::NetworkView, spikes::AbstractVector, voltage::Abstrac
     )
 
     # Create Plot
-    plot(
+    return plot(
         [edges_trace, nodes_trace],
         Layout(
             hovermode = "closest",
@@ -99,7 +99,7 @@ function plotNetwork(view::NetworkView, spikes::AbstractVector, voltage::Abstrac
 end
 
 function plotNetwork(view::NetworkView, monitor::Monitor, batch::Int = 1)
-    plotNetwork(view,
+    return plotNetwork(view,
         sum(monitor.spikes[:, batch, :], dims = 1)[1, :],
         mean(monitor.voltage[:, batch, :], dims = 1)[1, :]
     )
