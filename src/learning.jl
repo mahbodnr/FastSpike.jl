@@ -16,7 +16,7 @@ function train!(network::Network, learning_rule::STDP;
     clamp!(network.weight, min_weight, max_weight)
 end
 
-function ApplyLearningRule!(network::Network, learning_rule::STDP, softbound_decay::Union{Float64,AbstractMatrix})
+function ApplyLearningRule!(network::Network, learning_rule::STDP, softbound_decay::Union{AbstractFloat,AbstractMatrix})
     if learning_rule.τ₊ == learning_rule.τ₋
         SymmetricalSTDP!(network, learning_rule)
     else
