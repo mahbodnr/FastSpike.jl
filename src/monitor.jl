@@ -1,4 +1,5 @@
 using ..FastSpike: Network
+using JLD2
 
 mutable struct Monitor
     network::Network
@@ -27,4 +28,8 @@ end
 
 function Base.getindex(monitor::Monitor, idx::Union{UnitRange{Int64},Vector{Int64}})
     return Monitor(monitor.network, monitor.spikes[:,:,idx], monitor.voltage[:,:,idx])
+end
+
+function save(monitor::Monitor, filename::AbstractString)
+    save_object(filename, monitor)
 end
