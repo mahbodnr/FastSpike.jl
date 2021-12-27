@@ -1,4 +1,5 @@
 using ..FastSpike: NeuronType, LearningRule, pad1D, pad2D, Connection
+using JLD
 
 export Network
 mutable struct Network
@@ -185,4 +186,18 @@ function makeInput(network::Network, time::Integer, inputs::Dict{NeuronGroup})
                 input[:, group_input[1].idx] .= group_input[2]
         end
         return input
+end
+
+function save(network::Network, name::AbstractString)
+        jldopen(name, "w") do file
+                addrequire(file, FastSpike)
+                write(file, "network", network)
+        end
+end
+
+function load(name::AbstractString)
+        network = jldopen(name, "r") do file
+                read(file, "network")
+        end
+        return network
 end
