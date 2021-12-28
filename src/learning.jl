@@ -23,8 +23,9 @@ function ApplyLearningRule!(network::Network, learning_rule::STDP, softbound_dec
     e₊ = reshape(network.e₊, network.batch_size, :, 1)
     s₋ = reshape(network.spikes, network.batch_size, :, 1)
     e₋ = reshape(network.e₊, network.batch_size, 1, :)
+    weight_update = Array{eltype(network.weight)}(undef, size(network.weight))
     # Pre-Post activities
-    @einsum weight_update[i, j] := e₊[batch, i, x] * s₊[batch, x, j] # *w[i, j]
+    @einsum weight_update[i, j] += e₊[batch, i, x] * s₊[batch, x, j] # *w[i, j]
     # Post-Pre activities
     @einsum weight_update[i, j] -= s₋[batch, i, x] * e₋[batch, x, j] # *w[i, j]
     network.weight += weight_update .* network.adjacency .* softbound_decay
