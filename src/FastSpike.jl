@@ -1,6 +1,6 @@
 module FastSpike
 
-export  add_group!, connect!, run!, train!, pad1D, pad2D, record!, save, load,
+export  add_group!, connect!, run!, train!, pad1D, pad2D, record!, save, load, gpu,
         randomConnection, regularActivity, randomActivity, makeInput
 export Network, LearningRule, NeuronType, NeuronGroup, LIF, STDP, Monitor, Connection
 
