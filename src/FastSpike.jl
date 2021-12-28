@@ -3,7 +3,7 @@ module FastSpike
 using JLD2
 using Random
 using CUDA
-using Einsum
+using OMEinsum
 
 export  add_group!, connect!, run!, train!, pad1D, pad2D, record!, save, load, gpu,
         randomConnection, regularActivity, randomActivity, makeInput

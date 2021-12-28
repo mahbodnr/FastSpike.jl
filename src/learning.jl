@@ -28,9 +28,9 @@ function ApplyLearningRule!(network::Network, learning_rule::STDP, softbound_dec
         Array{eltype(network.weight)}(undef, size(network.weight))
     )
     # Pre-Post activities
-    @einsum weight_update[i, j] += e₊[batch, i, x] * s₊[batch, x, j] # *w[i, j]
+    weight_update += ein"bix,bxj->ij"(e₊, s₊)
     # Post-Pre activities
-    @einsum weight_update[i, j] -= s₋[batch, i, x] * e₋[batch, x, j] # *w[i, j]
+    weight_update -= ein"bix,bxj->ij"(s₋, e₋)
     network.weight += weight_update .* network.adjacency .* softbound_decay
     return
 end
