@@ -1,3 +1,5 @@
+export STDP
+
 abstract type LearningRule end
 
 """

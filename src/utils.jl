@@ -1,4 +1,6 @@
-using Random
+function load(filename::AbstractString)
+        return load_object(filename)
+    end
 
 function pad1D(X::AbstractArray, n::Int)
         return [X zeros(eltype(X), (size(X, 1), n))]

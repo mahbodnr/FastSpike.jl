@@ -1,6 +1,3 @@
-using ..FastSpike: Network, LearningRule, STDP
-using Einsum
-
 function train!(network::Network, learning_rule::STDP;
     min_weight = -Inf, max_weight = Inf, softbound = false
 )

@@ -1,6 +1,3 @@
-using ..FastSpike: NeuronType, LearningRule, pad1D, pad2D, Connection
-using JLD2
-
 export Network
 mutable struct Network
         neurons::NeuronType
@@ -24,10 +21,10 @@ function Network(
                 neurons,
                 batch_size,
                 nothing,
-                Array{AbstractFloat}(undef, (0, 0)),
-                Array{AbstractFloat}(undef, (0, 0)),
+                Array{Float64}(undef, (0, 0)),
+                Array{Float64}(undef, (0, 0)),
                 zeros(Bool, batch_size, 0),
-                ones(AbstractFloat, batch_size, 0),
+                ones(Float64, batch_size, 0),
                 zeros(Int64, batch_size, 0),
                 nothing,
                 nothing,
@@ -45,10 +42,10 @@ function Network(
                         neurons,
                         batch_size,
                         learning_rule,
-                        Array{AbstractFloat}(undef, (0, 0)),
-                        Array{AbstractFloat}(undef, (0, 0)),
+                        Array{Float64}(undef, (0, 0)),
+                        Array{Float64}(undef, (0, 0)),
                         zeros(Bool, batch_size, 0),
-                        ones(AbstractFloat, batch_size, 0),
+                        ones(Float64, batch_size, 0),
                         zeros(Int64, batch_size, 0),
                         zeros(Bool, batch_size, 0),
                         nothing,
@@ -59,10 +56,10 @@ function Network(
                         neurons,
                         batch_size,
                         learning_rule,
-                        Array{AbstractFloat}(undef, (0, 0)),
-                        Array{AbstractFloat}(undef, (0, 0)),
+                        Array{Float64}(undef, (0, 0)),
+                        Array{Float64}(undef, (0, 0)),
                         zeros(Bool, batch_size, 0),
-                        ones(AbstractFloat, batch_size, 0),
+                        ones(Float64, batch_size, 0),
                         zeros(Int64, batch_size, 0),
                         zeros(Bool, batch_size, 0),
                         zeros(Bool, batch_size, 0),

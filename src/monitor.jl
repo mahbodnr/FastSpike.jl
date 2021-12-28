@@ -1,6 +1,3 @@
-using ..FastSpike: Network
-using JLD2
-
 mutable struct Monitor
     network::Network
     spikes::AbstractArray
