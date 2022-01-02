@@ -73,10 +73,10 @@ function add_group!(network::Network, N::Int)
 
         network.weight = pad2D(network.weight, N)
         network.adjacency = pad2D(network.adjacency, N)
-        if network.e₊ !== nothing
+        if !isnothing(network.e₊)
                 network.e₊ = pad1D(network.e₊, N)
         end
-        if network.e₋ !== nothing
+        if !isnothing(network.e₋)
                 network.e₋ = pad1D(network.e₋, N)
         end
         network.spikes = pad1D(network.spikes, N)
@@ -168,10 +168,10 @@ function reset(network::Network)
         fill!(network.spikes, 0)
         fill!(network.voltage, 0)
         fill!(network.refractory, 0)
-        if network.e₊ !== nothing
+        if !isnothing(network.e₊)
                 fill!(network.e₊, 0)
         end
-        if network.e₋ !== nothing
+        if !isnothing(network.e₋)
                 fill!(network.e₋, 0)
         end
         return
@@ -189,3 +189,26 @@ function save(network::Network, filename::AbstractString)
         save_object(filename, network)
 end
 
+function Base.getindex(network::Network, idx::Union{UnitRange{Int},Vector{Int}})
+        new_e₊ = network.e₊
+        new_e₋ = network.e₋
+        if !isnothing(new_e₊)
+                new_e₊ = new_e₊[:,idx]
+        end
+        if !isnothing(new_e₋)
+                new_e₋ = new_e₋[:,idx]
+        end
+        return Network(
+                network.neurons,
+                network.batch_size,
+                network.learning_rule,
+                network.weight[idx,idx],
+                network.adjacency[idx,idx],
+                network.spikes[:,idx],
+                network.voltage[:,idx],
+                network.refractory[:,idx],
+                new_e₊,
+                new_e₋,
+                network.learning,
+        )
+end

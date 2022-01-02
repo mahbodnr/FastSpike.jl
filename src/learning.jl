@@ -23,10 +23,7 @@ function ApplyLearningRule!(network::Network, learning_rule::STDP, softbound_dec
     e₊ = reshape(network.e₊, network.batch_size, :, 1)
     s₋ = reshape(network.spikes, network.batch_size, :, 1)
     e₋ = reshape(network.e₊, network.batch_size, 1, :)
-    weight_update = convert(
-        typeof(network.weight),
-        Array{eltype(network.weight)}(undef, size(network.weight))
-    )
+    weight_update = network.weight .* 0
     # Pre-Post activities
     weight_update += ein"bix,bxj->ij"(e₊, s₊)
     # Post-Pre activities
