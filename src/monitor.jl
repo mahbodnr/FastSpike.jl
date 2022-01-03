@@ -14,45 +14,21 @@ end
 
 function Monitor(network::Network; record_weight = false)
     if record_weight
-        return WeightMonitor(
-            network, 
-            reshape(network.spikes, 1, size(network.spikes)...), 
-            reshape(network.voltage, 1, size(network.voltage)...), 
-            reshape(network.weight, 1, size(network.weight)...)
-            )
+        return WeightMonitor(network, [],[],[])
     else
-        return Monitor(
-            network, 
-            reshape(network.spikes, 1, size(network.spikes)...), 
-            reshape(network.voltage, 1, size(network.voltage)...), 
-            )
+        return Monitor(network, [],[])
     end
 end
 
 function record!(monitor::Monitor)
-    dims = size(monitor.network.spikes)
-    monitor.spikes = [monitor.spikes;
-        reshape(monitor.network.spikes, 1, dims...)]
-    monitor.voltage = [monitor.voltage;
-        reshape(monitor.network.voltage, 1, dims...)]
-    # if !isnothing(monitor.network.e₊)
-    #     monitor.e₊ = [monitor.e₊
-    #         reshape(monitor.network.e₊, 1, dims...)]
-    # end
-    # if !isnothing(monitor.network.e₋)
-    #     monitor.e₋ = [monitor.e₋
-    #         reshape(monitor.network.e₋, 1, dims...)]
-    # end
+    push!(monitor.spikes, monitor.network.spikes)
+    push!(monitor.voltage, monitor.network.voltage)
 end
 
 function record!(monitor::WeightMonitor)
-    dims = size(monitor.network.spikes)
-    monitor.spikes = [monitor.spikes;
-        reshape(monitor.network.spikes, 1, dims...)]
-    monitor.voltage = [monitor.voltage;
-        reshape(monitor.network.voltage, 1, dims...)]
-    monitor.weight = [monitor.weight;
-        reshape(monitor.network.weight, 1, size(monitor.network.weight)...)]
+    push!(monitor.spikes, monitor.network.spikes)
+    push!(monitor.voltage, monitor.network.voltage)
+    push!(monitor.weight, monitor.network.weight)
 end
 
 function Base.getindex(monitor::Monitor, idx::Union{UnitRange{Int},Vector{Int}})
@@ -67,6 +43,8 @@ function save(monitor::Union{Monitor, WeightMonitor}, filename::AbstractString)
     save_object(filename, monitor)
 end
 
+# TODO: This part must be updated to support recent changes to the monitors
+"""
 function PSP(monitor::WeightMonitor; time =:, from =:, to =:)
     if typeof(from) == NeuronGroup
             from = from.idx
@@ -167,3 +145,4 @@ function IPSP(monitor::Monitor; time =:, from =:, to =:)
     spikes_from_group[:,from] .= total_spikes[:,from]
     return (spikes_from_group * neg_weight)[:,to]
 end
+"""
