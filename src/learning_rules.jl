@@ -14,24 +14,13 @@ struct STDP <: LearningRule
     traces_additive::Bool
 end
 
-function STDP()
-    STDP(
-        1,
-        1,
-        10,
-        10,
-        1,
-        false
-    )
-end
+STDP() = STDP(1, 1, 10, 10, 1, false)
 
-function STDP(A₊::Real, A₋::Real, τ₊::Real, τ₋::Real)
-    STDP(
+STDP(A₊::Real, A₋::Real, τ₊::Real, τ₋::Real; trace_scale=1, traces_additive= false) = STDP(
         A₊,
         A₋,
         τ₊,
         τ₋,
-        1,
-        false
+        trace_scale,
+        traces_additive
     )
-end

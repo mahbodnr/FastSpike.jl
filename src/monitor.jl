@@ -14,9 +14,18 @@ end
 
 function Monitor(network::Network; record_weight = false)
     if record_weight
-        return WeightMonitor(network, Array{Bool}(undef, 0), Array{Float64}(undef, 0), Array{Float64}(undef, 0))
+        return WeightMonitor(
+            network, 
+            reshape(network.spikes, 1, size(network.spikes)...), 
+            reshape(network.voltage, 1, size(network.voltage)...), 
+            reshape(network.weight, 1, size(network.weight)...)
+            )
     else
-        return Monitor(network, Array{Bool}(undef, 0), Array{Float64}(undef, 0))
+        return Monitor(
+            network, 
+            reshape(network.spikes, 1, size(network.spikes)...), 
+            reshape(network.voltage, 1, size(network.voltage)...), 
+            )
     end
 end
 

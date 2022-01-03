@@ -14,7 +14,7 @@ function train!(network::Network, learning_rule::STDP;
 end
 
 function ApplyLearningRule!(network::Network, learning_rule::STDP, softbound_decay::Union{AbstractFloat,AbstractMatrix})
-    if learning_rule.τ₊ == learning_rule.τ₋
+    if learning_rule.τ₊ == learning_rule.τ₋ && learning_rule.A₊ == learning_rule.A₋
         SymmetricalSTDP!(network, learning_rule)
     else
         AsymmetricalSTDP!(network, learning_rule)

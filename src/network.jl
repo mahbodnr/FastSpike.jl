@@ -1,4 +1,5 @@
 export Network
+
 mutable struct Network
         neurons::NeuronType
         batch_size::Int
@@ -37,7 +38,7 @@ function Network(
         batch_size::Int,
         learning_rule::Union{LearningRule,Nothing}
 )
-        if learning_rule.τ₊ == learning_rule.τ₋
+        if learning_rule.τ₊ == learning_rule.τ₋ && learning_rule.A₊ == learning_rule.A₋
                 return Network(
                         neurons,
                         batch_size,
@@ -162,9 +163,7 @@ function run!(
         return network.spikes, network.voltage
 end
 
-
-
-function reset(network::Network)
+function reset!(network::Network)
         fill!(network.spikes, 0)
         fill!(network.voltage, 0)
         fill!(network.refractory, 0)
@@ -177,8 +176,8 @@ function reset(network::Network)
         return
 end
 
-function makeInput(network::Network, time::Integer, inputs::Dict{NeuronGroup})
-        input = zeros(Bool, time, size(network.weight)[1])
+function makeInput(network::Network, time::Integer, inputs::Dict{NeuronGroup}, type = Float64)
+        input = zeros(type, time, size(network.weight)[1])
         for group_input in inputs
                 input[:, group_input[1].idx] .= group_input[2]
         end

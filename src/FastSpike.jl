@@ -6,7 +6,7 @@ using CUDA
 using OMEinsum
 using NNlib
 
-export  add_group!, connect!, run!, train!, pad1D, pad2D, record!, save, load, gpu,
+export  add_group!, connect!, run!, train!, reset!, pad1D, pad2D, record!, save, load, gpu,
         randomConnection, regularActivity, randomActivity, makeInput, PSP, EPSP, IPSP
 export Network, LearningRule, NeuronType, NeuronGroup, LIF, STDP, Monitor, Connection
 
