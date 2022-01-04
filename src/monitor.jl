@@ -21,14 +21,14 @@ function Monitor(network::Network; record_weight = false)
 end
 
 function record!(monitor::Monitor)
-    push!(monitor.spikes, monitor.network.spikes)
-    push!(monitor.voltage, monitor.network.voltage)
+    push!(monitor.spikes, monitor.network.spikes |> cpu)
+    push!(monitor.voltage, monitor.network.voltage |> cpu)
 end
 
 function record!(monitor::WeightMonitor)
-    push!(monitor.spikes, monitor.network.spikes)
-    push!(monitor.voltage, monitor.network.voltage)
-    push!(monitor.weight, monitor.network.weight)
+    push!(monitor.spikes, monitor.network.spikes |> cpu)
+    push!(monitor.voltage, monitor.network.voltage |> cpu)
+    push!(monitor.weight, monitor.network.weight |> cpu)
 end
 
 function Base.getindex(monitor::Monitor, idx::Union{UnitRange{Int},Vector{Int}})
@@ -44,6 +44,7 @@ function save(monitor::Union{Monitor, WeightMonitor}, filename::AbstractString)
 end
 
 # TODO: This part must be updated to support recent changes to the monitors
+# using RecursiveArrayTools; convert(Array,VectorOfArray(monitor.spikes))
 """
 function PSP(monitor::WeightMonitor; time =:, from =:, to =:)
     if typeof(from) == NeuronGroup
