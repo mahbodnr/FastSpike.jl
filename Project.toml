@@ -13,6 +13,7 @@ OMEinsum = "ebe7aa44-baf0-506c-a96f-8464559b3922"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [compat]
+Adapt = "3"
 CUDA = "3"
 julia = "1"
 
