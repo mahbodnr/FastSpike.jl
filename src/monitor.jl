@@ -23,12 +23,14 @@ end
 function record!(monitor::Monitor)
     push!(monitor.spikes, monitor.network.spikes |> cpu)
     push!(monitor.voltage, monitor.network.voltage |> cpu)
+    return
 end
 
 function record!(monitor::WeightMonitor)
     push!(monitor.spikes, monitor.network.spikes |> cpu)
     push!(monitor.voltage, monitor.network.voltage |> cpu)
     push!(monitor.weight, monitor.network.weight |> cpu)
+    return
 end
 
 function Base.getindex(monitor::Monitor, idx::Union{UnitRange{Int},Vector{Int}})

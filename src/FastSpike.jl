@@ -7,8 +7,9 @@ using CUDA
 using Adapt
 using OMEinsum
 
-export  add_group!, connect!, run!, train!, reset!, pad1D, pad2D, record!, save, load, gpu,
-        randomConnection, regularActivity, randomActivity, makeInput, PSP, EPSP, IPSP
+export  add_group!, connect!, run!, train!, reset!, pad1D, pad2D, record!, save, load, 
+        gpu, cpu, randomConnection, regularActivity, randomActivity, makeInput
+        #  PSP, EPSP, IPSP
 export Network, LearningRule, NeuronType, NeuronGroup, LIF, STDP, Monitor, Connection
 
 include("utils.jl")
