@@ -12,6 +12,7 @@ mutable struct Network
         e₊::Union{AbstractArray,Nothing}
         e₋::Union{AbstractArray,Nothing}
         learning::Bool
+        groups::Dict{String, NeuronGroup}
 end
 
 function Network(
@@ -30,6 +31,7 @@ function Network(
                 nothing,
                 nothing,
                 false,
+                Dict{String, NeuronGroup}(),
         )
 end
 
@@ -51,6 +53,7 @@ function Network(
                         zeros(Bool, batch_size, 0),
                         nothing,
                         true,
+                        Dict{String, NeuronGroup}(),
                 )
         else
                 return Network(
@@ -65,11 +68,12 @@ function Network(
                         zeros(Bool, batch_size, 0),
                         zeros(Bool, batch_size, 0),
                         true,
+                        Dict{String, NeuronGroup}(),
                 )
         end
 end
 
-function add_group!(network::Network, N::Int)
+function add_group!(network::Network, N::Int; name::Union{String, Nothing}= nothing)
         Group = NeuronGroup(N, size(network.weight, 1)+1:size(network.weight, 1)+N)
 
         network.weight = pad2D(network.weight, N)
@@ -84,6 +88,11 @@ function add_group!(network::Network, N::Int)
         network.voltage = pad1D(network.voltage, N)
         fill!(network.voltage, network.neurons.v_rest)
         network.refractory = pad1D(network.refractory, N)
+
+        if isnothing(name)
+                name = "group_$(length(network.groups)+1)"
+        end
+        network.groups[name] = Group
 
         return Group
 end
@@ -185,7 +194,7 @@ function makeInput(network::Network, time::Integer, inputs::Dict{NeuronGroup}, t
 end
 
 function save(network::Network, filename::AbstractString)
-        save_object(filename, network)
+        save_object(filename, network |> cpu)
 end
 
 function Base.getindex(network::Network, idx::Union{UnitRange{Int},Vector{Int}})
