@@ -17,6 +17,7 @@ function gpu(net::Network)
         gpu(net.e₊),
         gpu(net.e₋),
         net.learning,
+        net.groups
     )
 end
 function cpu(net::Network)
@@ -32,5 +33,6 @@ function cpu(net::Network)
         cpu(net.e₊),
         cpu(net.e₋),
         net.learning,
+        net.groups
     )
 end
