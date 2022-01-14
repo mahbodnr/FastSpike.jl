@@ -1,5 +1,6 @@
 module FastSpike
 
+using LinearAlgebra
 using Random
 using RecursiveArrayTools
 using JLD2
@@ -10,7 +11,7 @@ using OMEinsum
 
 export add_group!, connect!, run!, train!, reset!, pad1D, pad2D, record!, save, load, 
         gpu, cpu, randomConnection, regularActivity, randomActivity, makeInput,
-        PSP, EPSP, IPSP
+        PSP, EPSP, IPSP, EI
 export Network, LearningRule, NeuronType, NeuronGroup, LIF, STDP, Monitor, Connection
 
 include("utils.jl")

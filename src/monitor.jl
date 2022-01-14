@@ -55,7 +55,7 @@ function PSP(monitor::WeightMonitor; time =:, from =:, to =:)
     weight_array = convert(Array,VectorOfArray(monitor.weight)) #size: w1, w2, time
     spikes_array = convert(Array,VectorOfArray(monitor.spikes)) #size: batch_size, #neurons, time
     spikes_from_group = zeros(size(spikes_array))
-    spikes_from_group[:,:,from] .= spikes_array[:,from,:]
+    spikes_from_group[:,from,:] .= spikes_array[:,from,:]
 
     total_PSP = spikes_from_group ⊠ weight_array #size : batch_size, #neurons, tim
     return PermutedDimsArray(total_PSP[:,to,time], (3,1,2)) #size(PSP): time, batch_size, #neurons
@@ -73,7 +73,7 @@ function EPSP(monitor::WeightMonitor; time =:, from =:, to =:)
     pos_weight = map(pos, convert(Array,VectorOfArray(monitor.weight))) #size: w1, w2, time
     spikes_array = convert(Array,VectorOfArray(monitor.spikes)) #size: batch_size, #neurons, time
     spikes_from_group = zeros(size(spikes_array))
-    spikes_from_group[:,:,from] .= spikes_array[:,from,:]
+    spikes_from_group[:,from,:] .= spikes_array[:,from,:]
     total_EPSP = spikes_from_group ⊠ pos_weight #size : batch_size, #neurons, time 
     return PermutedDimsArray(total_EPSP[:,to,time], (3,1,2)) #size(PSP): time, batch_size, #neurons
 end
@@ -85,11 +85,11 @@ function IPSP(monitor::WeightMonitor; time =:, from =:, to =:)
     if typeof(to) == NeuronGroup
             to = to.idx
     end
-    neg(x) = ifelse(x>0 , x , 0)
+    neg(x) = ifelse(x<0 , x , 0)
     neg_weight = map(neg, convert(Array,VectorOfArray(monitor.weight))) #size: w1, w2, time
     spikes_array = convert(Array,VectorOfArray(monitor.spikes)) #size: batch_size, #neurons, time
     spikes_from_group = zeros(size(spikes_array))
-    spikes_from_group[:,:,from] .= spikes_array[:,from,:]
+    spikes_from_group[:,from,:] .= spikes_array[:,from,:]
     total_EPSP = spikes_from_group ⊠ neg_weight #size : batch_size, #neurons, time 
     return PermutedDimsArray(total_EPSP[:,to,time], (3,1,2)) #size(PSP): time, batch_size, #neurons
 end

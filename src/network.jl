@@ -218,5 +218,6 @@ function Base.getindex(network::Network, idx::Union{UnitRange{Int},Vector{Int}})
                 new_e₊,
                 new_e₋,
                 network.learning,
+                network.groups,
         )
 end

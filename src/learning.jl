@@ -10,7 +10,7 @@ function train!(network::Network, learning_rule::STDP;
         softbound_decay = 1.0
     end
     ApplyLearningRule!(network, learning_rule, softbound_decay)
-    clamp!(network.weight, min_weight, max_weight)
+    network.weight = clamp.(network.weight, min_weight, max_weight)
 end
 
 function ApplyLearningRule!(network::Network, learning_rule::STDP, softbound_decay::Union{AbstractFloat,AbstractMatrix})
@@ -36,9 +36,9 @@ end
 function SymmetricalSTDP!(network::Network, learning_rule::STDP)
     network.e₊ *= exp(-network.neurons.dt / learning_rule.τ₊)
     if learning_rule.traces_additive
-        network.e₊ += learning_rule.trace_scale * network.spikes
+        network.e₊ += learning_rule.A₊ * learning_rule.trace_scale * network.spikes
     else
-        network.e₊[network.spikes] .= learning_rule.trace_scale
+        network.e₊[network.spikes] .= learning_rule.A₊ * learning_rule.trace_scale
     end
     network.e₋ = network.e₊
     return
