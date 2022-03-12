@@ -156,11 +156,11 @@ function run!(
         network.voltage[network.refractory.>0] .= network.neurons.v_rest # reset the voltage of the neurons in the refractory period
         network.voltage[network.spikes] .= network.neurons.v_reset  # change the voltage of spiked neurons to v_reset
         # Evoke spikes
-        if !isnothing(input_spikes)
-                network.spikes = network.voltage .>= network.neurons.v_thresh
-        end
+        network.spikes = network.voltage .>= network.neurons.v_thresh
         # External spikes
-        network.spikes = network.spikes .| input_spikes
+        if !isnothing(input_spikes)
+                network.spikes = network.spikes .| input_spikes
+        end
         # Update refractory timepoints
         network.refractory .-= network.neurons.dt
         network.refractory[network.spikes] .= network.neurons.refractory_period
@@ -174,7 +174,7 @@ end
 
 function reset!(network::Network)
         fill!(network.spikes, 0)
-        fill!(network.voltage, 0)
+        fill!(network.voltage, network.neurons.v_rest)
         fill!(network.refractory, 0)
         if !isnothing(network.e₊)
                 fill!(network.e₊, 0)
