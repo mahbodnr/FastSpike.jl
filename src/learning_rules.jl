@@ -10,17 +10,25 @@ struct STDP <: LearningRule
     A₋::Real
     τ₊::Real
     τ₋::Real
+    min_weight::Real
+    max_weight::Real
+    softbound::Bool
     trace_scale::Real
     traces_additive::Bool
 end
 
-STDP() = STDP(1, 1, 10, 10, 1, false)
+STDP() = STDP(1, 1, 10, 10, -Inf, Inf, false, 1, false)
 
-STDP(A₊::Real, A₋::Real, τ₊::Real, τ₋::Real; trace_scale=1, traces_additive= false) = STDP(
-        A₊,
-        A₋,
-        τ₊,
-        τ₋,
-        trace_scale,
-        traces_additive
-    )
+STDP(A₊::Real, A₋::Real, τ₊::Real, τ₋::Real;
+    min_weight = -Inf, max_weight = Inf, softbound = false, trace_scale = 1,
+    traces_additive = false) = STDP(
+    A₊,
+    A₋,
+    τ₊,
+    τ₋,
+    min_weight,
+    max_weight,
+    softbound,
+    trace_scale,
+    traces_additive
+)

@@ -2,3 +2,4 @@
 /docs/build/
 # VScode config files
 .vscode/
+local_test.jl

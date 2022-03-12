@@ -1,16 +1,17 @@
-function train!(network::Network, learning_rule::STDP;
-    min_weight = -Inf, max_weight = Inf, softbound = false
-)
-    if softbound
-        if abs(min_weight) == Inf || abs(max_weight) == Inf
+function train!(network::Network, learning_rule::STDP)
+    if learning_rule.softbound
+        if abs(learning_rule.min_weight) == Inf || abs(learning_rule.max_weight) == Inf
             error("min_weight and max_weight cannot be Inf")
         end
-        softbound_decay = -1 .* (network.weight .- min_weight) .* (network.weight .- max_weight)
+        softbound_decay = begin
+            (network.weight .- learning_rule.min_weight) .*
+            (learning_rule.max_weight .- network.weight)
+        end
     else
         softbound_decay = 1.0
     end
     ApplyLearningRule!(network, learning_rule, softbound_decay)
-    network.weight = clamp.(network.weight, min_weight, max_weight)
+    network.weight = clamp.(network.weight, learning_rule.min_weight, learning_rule.max_weight)
 end
 
 function ApplyLearningRule!(network::Network, learning_rule::STDP, softbound_decay::Union{AbstractFloat,AbstractMatrix})
