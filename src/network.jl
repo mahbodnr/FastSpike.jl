@@ -4,12 +4,12 @@ mutable struct Network{T<:NeuronType}
         neurons::T
         batch_size::Int
         learning_rule::Union{LearningRule,Nothing}
-        weight::AbstractArray
-        adjacency::AbstractArray
-        spikes::AbstractArray
-        voltage::AbstractArray
+        weight::AbstractArray # size: (N, N)
+        adjacency::AbstractArray # size: (N, N)
+        spikes::AbstractArray # size: (Batch size, N)
+        voltage::AbstractArray # size: (Batch size, N)
         recovery::AbstractArray # membrane recovery variable, only applicable to Izhikevich neurons 
-        refractory::AbstractArray
+        refractory::AbstractArray # refractory period size: (Batch size, N), only applicable to LIF neurons 
         e₊::Union{AbstractArray,Nothing}
         e₋::Union{AbstractArray,Nothing}
         learning::Bool
@@ -132,9 +132,7 @@ function connect!(
         target::NeuronGroup,
         weight::AbstractArray,
 )
-        network.weight[source.idx, target.idx] = weight
-        network.adjacency[source.idx, target.idx] = ones(Bool, source.n, target.n)
-        return
+        return connect!(network, source, target, weight, ones(Bool, source.n, target.n))
 end
 
 function connect!(
@@ -204,6 +202,7 @@ function _update!(
                 network.spikes = network.spikes .| input_spikes
         end
         current = network.spikes * network.weight
+        # External voltage:
         if !isnothing(input_voltage)
                 current += input_voltage
         end

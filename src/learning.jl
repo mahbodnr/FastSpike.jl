@@ -1,4 +1,4 @@
-function train!(network::Network, learning_rule::STDP)
+function train!(network::Union{Network,DelayNetwork}, learning_rule::STDP)
     if learning_rule.softbound
         if abs(learning_rule.min_weight) == Inf || abs(learning_rule.max_weight) == Inf
             error("min_weight and max_weight cannot be Inf")
@@ -33,8 +33,26 @@ function ApplyLearningRule!(network::Network, learning_rule::STDP, softbound_dec
     return
 end
 
+function ApplyLearningRule!(network::DelayNetwork, learning_rule::STDP, softbound_decay::Union{AbstractFloat,AbstractMatrix})
+    if learning_rule.τ₊ == learning_rule.τ₋ && learning_rule.A₊ == learning_rule.A₋
+        SymmetricalSTDP!(network, learning_rule)
+    else
+        AsymmetricalSTDP!(network, learning_rule)
+    end
+    s₊ = reshape(network.spikes, 1, 1, :)
+    e₊ = reshape(network.e₊, 1, :, 1)
+    s₋ = reshape(network.spikes, 1, :, 1)
+    e₋ = reshape(network.e₋, 1, 1, :)
+    weight_update = network.weight .* 0
+    # Pre-Post activities
+    weight_update += ein"bix,bxj->ij"(e₊, s₊)
+    # Post-Pre activities
+    weight_update -= ein"bix,bxj->ij"(s₋, e₋)
+    network.weight += weight_update .* network.adjacency .* softbound_decay
+    return
+end
 
-function SymmetricalSTDP!(network::Network, learning_rule::STDP)
+function SymmetricalSTDP!(network::Union{Network,DelayNetwork}, learning_rule::STDP)
     network.e₊ *= exp(-network.neurons.dt / learning_rule.τ₊)
     if learning_rule.traces_additive
         network.e₊ += learning_rule.A₊ * learning_rule.trace_scale * network.spikes
@@ -45,7 +63,7 @@ function SymmetricalSTDP!(network::Network, learning_rule::STDP)
     return
 end
 
-function AsymmetricalSTDP!(network::Network, learning_rule::STDP)
+function AsymmetricalSTDP!(network::Union{Network,DelayNetwork}, learning_rule::STDP)
     network.e₊ *= exp(-network.neurons.dt / learning_rule.τ₊)
     network.e₋ *= exp(-network.neurons.dt / learning_rule.τ₋)
     if learning_rule.traces_additive

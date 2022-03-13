@@ -1,5 +1,5 @@
 mutable struct Monitor
-    network::Network
+    network::Union{Network, DelayNetwork}
     spikes::AbstractArray
     voltage::AbstractArray
     recovery::AbstractArray
@@ -7,13 +7,13 @@ mutable struct Monitor
     # e₋::AbstractArray
 end
 mutable struct WeightMonitor
-    network::Network
+    network::Union{Network, DelayNetwork}
     spikes::AbstractArray
     voltage::AbstractArray
     weight::AbstractArray
 end
 
-function Monitor(network::Network; record_weight = false)
+function Monitor(network::Union{Network,DelayNetwork}; record_weight = false)
     if record_weight
         return WeightMonitor(network, [], [], [])
     else

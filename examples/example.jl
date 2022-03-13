@@ -40,7 +40,7 @@ function train(time)
         run!(net, input_spikes = reshape(input_spikes[t, :], 1, :))
         record!(monitor)
         append!(active_neurons, [(t, i[2]) for i in findall(net.spikes)])
-        plot_weights(sum(monitor.spikes[:, 1, neurons.idx], dims = 2), Tuple.(active_neurons))
+        # plot_weights(sum(monitor.spikes[:, 1, neurons.idx], dims = 2), Tuple.(active_neurons))
     end
 end
 # Run
