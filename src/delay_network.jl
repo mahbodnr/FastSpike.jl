@@ -165,7 +165,7 @@ function connect!(
     source::NeuronGroup,
     target::NeuronGroup,
     connection::Connection,
-    delay::Connection,
+    delay::AbstractArray,
 )
     connect!(network, source, target, connection.weight, connection.adjacency, delay)
 end
