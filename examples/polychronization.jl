@@ -30,7 +30,7 @@ min_weight, max_weight = EI(
 # Define Network
 net = DelayNetwork(
     Izhikevich(1, a, b, c, d, 30.0),
-    STDP(1e-2, 1e-4, 20, 20; min_weight = min_weight, max_weight = max_weight)
+    STDP(0.1, 0.12, 20, 20; min_weight = min_weight, max_weight = max_weight)
 )
 neurons = add_group!(net, N)
 # connections in neural group
@@ -52,8 +52,9 @@ function train(time)
         append!(spiked_neurons, [(t, i[2]) for i in findall(net.spikes)])
         if t % 1000 == 0
             plot(
-                scatter(Tuple.(spiked_neurons), markersize = 1, c = :black),
-                title = "time: $(t%1000)s"
+                scatter(Tuple.(spiked_neurons), markersize = 1, c = :black, title = "time: $(t÷1000)s",),
+                histogram(net.weight[1:800, :][convert(Matrix{Bool}, net.adjacency)[1:800, :]], title = "Excitatory weight histogram");
+                layout = (2, 1)
             )
             spiked_neurons = []
         end
