@@ -29,6 +29,7 @@ function ApplyLearningRule!(network::Network, learning_rule::STDP, softbound_dec
     weight_update += ein"bix,bxj->ij"(e₊, s₊)
     # Post-Pre activities
     weight_update -= ein"bix,bxj->ij"(s₋, e₋)
+    # Update weights
     network.weight += weight_update .* network.adjacency .* softbound_decay
     return
 end
@@ -48,6 +49,7 @@ function ApplyLearningRule!(network::DelayNetwork, learning_rule::STDP, softboun
     weight_update += ein"bix,bxj->ij"(e₊, s₊)
     # Post-Pre activities
     weight_update -= ein"bix,bxj->ij"(s₋, e₋)
+    # Update weights
     network.weight += weight_update .* network.adjacency .* softbound_decay
     return
 end

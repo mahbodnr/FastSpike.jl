@@ -25,7 +25,8 @@ function randomConnection(n_source::Int, n_target::Int, p::AbstractFloat; min_we
 end
 
 function EI(Nₑ::Integer, Nᵢ::Integer;
-    E_E::Tuple = (0, 1), E_I::Tuple = (0, 1), I_E::Tuple = (0, 1), I_I::Tuple = (0, 1)
+    E_E::Tuple = (0, 1), E_I::Tuple = (0, 1), I_E::Tuple = (0, 1), I_I::Tuple = (0, 1),
+    adjacency::Union{Nothing,AbstractMatrix} = nothing
 )
     excitatory = [ones(Nₑ); zeros(Nᵢ)]
     inhibitory = [zeros(Nₑ); ones(Nᵢ)]
@@ -39,6 +40,11 @@ function EI(Nₑ::Integer, Nᵢ::Integer;
     max_weight += (excitatory * transpose(inhibitory)) .* E_I[2]
     max_weight -= (inhibitory * transpose(excitatory)) .* abs(I_E[1])
     max_weight -= (inhibitory * transpose(inhibitory)) .* abs(I_I[1])
+
+    if !isnothing(adjacency)
+        min_weight .*= adjacency
+        max_weight .*= adjacency
+    end
 
     return min_weight, max_weight
 end
