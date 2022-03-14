@@ -7,7 +7,7 @@ const time = 100
 const N = 20
 const input_dim = 5
 # Define Network
-net = Network(Izhikevich("fast spiking"), 2, STDP(1e-2, 1e-4, 20, 10; softbound = true, min_weight = 0, max_weight = 1))
+net = Network(LIF(1), 2, STDP(1e-2, 1e-4, 20, 10; softbound = true, min_weight = 0, max_weight = 1))
 input = add_group!(net, input_dim)
 neurons = add_group!(net, N)
 # input to neurons
