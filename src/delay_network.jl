@@ -237,27 +237,28 @@ function _update!(
     end
     # update delayed voltages and current
     network.delayed_voltages += sum(
-        network.spikes .* network.weight .* network._delay,
+        transpose(network.spikes) .* network.weight .* network._delay,
         dims = 1
     )[1, :, :]
-    current = network.delayed_voltages[:, 1]
+    current = transpose(network.delayed_voltages[:, 1])
     # External voltage:
     if !isnothing(input_voltage)
         current += input_voltage
     end
     # update voltages
-    network.voltage[network.spikes] .= network.neurons.c  # change the voltage of spiked neurons to c
-    network.recovery[network.spikes] .+= network.neurons.d  # add d to the recovery parameter of spiked neurons
-    network.voltage += 0.04 .* network.voltage .^ 2 + 5 .* network.voltage .+ 140 - network.recovery + reshape(current, (1, size(current)[1]))
+    network.voltage[network.spikes] .= (network.spikes.*network.neurons.c)[network.spikes]  # change the voltage of spiked neurons to c #TODO: optimize for scalar values
+    network.recovery[network.spikes] .+= (network.spikes.*network.neurons.d)[network.spikes]  # add d to the recovery parameter of spiked neurons #TODO: optimize for scalar values
+    network.voltage += 0.04 .* network.voltage .^ 2 + 5 .* network.voltage .+ 140 - network.recovery + current
     network.recovery += network.neurons.a .* (network.neurons.b .* network.voltage - network.recovery)
 end
 
 
 function reset!(network::DelayNetwork)
     fill!(network.spikes, 0)
-    fill!(network.voltage, network.neurons.v_rest)
     if typeof(network.neurons) <: Izhikevich
         network.recovery = network.neurons.b .* network.voltage
+    else
+        fill!(network.voltage, network.neurons.v_rest)
     end
     fill!(network.refractory, 0)
     if !isnothing(network.e₊)

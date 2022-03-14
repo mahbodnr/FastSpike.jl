@@ -24,79 +24,80 @@ end
 
 struct Izhikevich <: NeuronType
     dt::Int
-    a::Real
-    b::Real
-    c::Real
-    d::Real
-    v_thresh::Real
+    a::Union{Real,AbstractMatrix}
+    b::Union{Real,AbstractMatrix}
+    c::Union{Real,AbstractMatrix}
+    d::Union{Real,AbstractMatrix}
+    v_thresh::Union{Real,AbstractMatrix}
+end
 
-    function Izhikevich(type::String; dt = 1)
-        if type == "RS" || type == "regular spiking"
-            new(
-                UInt(dt),
-                0.02,
-                0.2,
-                -65.0,
-                8.0,
-                30.0
-            )
-        elseif type == "IB" || type == "intrinsically bursting"
-            new(
-                UInt(dt),
-                0.02,
-                0.2,
-                -55.0,
-                4.0,
-                30.0
-            )
-        elseif type == "CH" || type == "chattering"
-            new(
-                UInt(dt),
-                0.02,
-                0.2,
-                -50.0,
-                2.0,
-                30.0
-            )
-        elseif type == "FS" || type == "fast spiking"
-            new(
-                UInt(dt),
-                0.1,
-                0.2,
-                -65.0,
-                2.0,
-                30.0
-            )
-        elseif type == "LTS" || type == "low-threshold spiking"
-            new(
-                UInt(dt),
-                0.02,
-                0.25,
-                -65.0,
-                2.0,
-                30.0
-            )
-        elseif type == "TC" || type == "thalamo-cortical"
-            new(
-                UInt(dt),
-                0.02,
-                0.25,
-                -65.0,
-                0.05,
-                30.0
-            )
-        elseif type == "RZ" || type == "resonator"
-            new(
-                UInt(dt),
-                0.1,
-                0.26,
-                -65.0,
-                2.0,
-                30.0
-            )
-        else
-            error("Unknown neuron type. Use one of 'RS' or 'regular spiking', 'IB' or 'intrinsically bursting', 'CH' or 'chattering', 'FS' or 'fast spiking', 'LTS' or 'low-threshold spiking', 'TC' or 'thalamo-cortical', 'RZ' or 'resonator'")
-        end
+
+function Izhikevich(type::String; dt = 1)
+    if type == "RS" || type == "regular spiking"
+        Izhikevich(
+            UInt(dt),
+            0.02,
+            0.2,
+            -65.0,
+            8.0,
+            30.0
+        )
+    elseif type == "IB" || type == "intrinsically bursting"
+        Izhikevich(
+            UInt(dt),
+            0.02,
+            0.2,
+            -55.0,
+            4.0,
+            30.0
+        )
+    elseif type == "CH" || type == "chattering"
+        Izhikevich(
+            UInt(dt),
+            0.02,
+            0.2,
+            -50.0,
+            2.0,
+            30.0
+        )
+    elseif type == "FS" || type == "fast spiking"
+        Izhikevich(
+            UInt(dt),
+            0.1,
+            0.2,
+            -65.0,
+            2.0,
+            30.0
+        )
+    elseif type == "LTS" || type == "low-threshold spiking"
+        Izhikevich(
+            UInt(dt),
+            0.02,
+            0.25,
+            -65.0,
+            2.0,
+            30.0
+        )
+    elseif type == "TC" || type == "thalamo-cortical"
+        Izhikevich(
+            UInt(dt),
+            0.02,
+            0.25,
+            -65.0,
+            0.05,
+            30.0
+        )
+    elseif type == "RZ" || type == "resonator"
+        Izhikevich(
+            UInt(dt),
+            0.1,
+            0.26,
+            -65.0,
+            2.0,
+            30.0
+        )
+    else
+        error("Unknown neuron type. Use one of 'RS' or 'regular spiking', 'IB' or 'intrinsically bursting', 'CH' or 'chattering', 'FS' or 'fast spiking', 'LTS' or 'low-threshold spiking', 'TC' or 'thalamo-cortical', 'RZ' or 'resonator'")
     end
 end
 

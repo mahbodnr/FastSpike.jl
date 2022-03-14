@@ -216,9 +216,11 @@ end
 
 function reset!(network::Network)
         fill!(network.spikes, 0)
-        fill!(network.voltage, network.neurons.v_rest)
         if typeof(network.neurons) <: Izhikevich
+                fill!(network.voltage, network.neurons.c)
                 network.recovery = network.neurons.b .* network.voltage
+        else
+                fill!(network.voltage, network.neurons.v_rest)
         end
         fill!(network.refractory, 0)
         if !isnothing(network.e₊)

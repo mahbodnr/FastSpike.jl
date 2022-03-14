@@ -10,8 +10,8 @@ struct STDP <: LearningRule
     A₋::Real
     τ₊::Real
     τ₋::Real
-    min_weight::Real
-    max_weight::Real
+    min_weight::Union{Real,AbstractMatrix}
+    max_weight::Union{Real,AbstractMatrix}
     softbound::Bool
     trace_scale::Real
     traces_additive::Bool
