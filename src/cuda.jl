@@ -6,7 +6,7 @@ gpu(x::AbstractArray) = cu(x)
 
 function gpu(net::Network)
     return Network(
-        net.neurons,
+        gpu(net.neurons),
         net.batch_size,
         net.learning_rule,
         gpu(net.weight),
@@ -24,7 +24,7 @@ end
 
 function cpu(net::Network)
     return Network(
-        net.neurons,
+        cpu(net.neurons),
         net.batch_size,
         net.learning_rule,
         cpu(net.weight),
@@ -42,7 +42,7 @@ end
 
 function gpu(net::DelayNetwork)
     return DelayNetwork(
-        net.neurons,
+        gpu(net.neurons),
         net.learning_rule,
         gpu(net.weight),
         gpu(net.adjacency),
@@ -62,7 +62,7 @@ end
 
 function cpu(net::DelayNetwork)
     return DelayNetwork(
-        net.neurons,
+        cpu(net.neurons),
         net.learning_rule,
         cpu(net.weight),
         cpu(net.adjacency),
@@ -77,5 +77,27 @@ function cpu(net::DelayNetwork)
         cpu(net.e₋),
         net.learning,
         net.groups
+    )
+end
+
+function gpu(neuron::Izhikevich)
+    return Izhikevich(
+        neuron.dt,
+        gpu(neuron.a),
+        gpu(neuron.b),
+        gpu(neuron.c),
+        gpu(neuron.d),
+        gpu(neuron.v_thresh),
+    )
+end
+
+function cpu(neuron::Izhikevich)
+    return Izhikevich(
+        neuron.dt,
+        cpu(neuron.a),
+        cpu(neuron.b),
+        cpu(neuron.c),
+        cpu(neuron.d),
+        cpu(neuron.v_thresh),
     )
 end
