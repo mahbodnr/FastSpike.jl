@@ -104,28 +104,28 @@ end
 
 function gpu(learning_rule::STDP)
     return STDP(
-        gpu(A₊),
-        gpu(A₋),
-        gpu(τ₊),
-        gpu(τ₋),
-        gpu(min_weight),
-        gpu(max_weight),
-        softbound,
-        gpu(trace_scale),
-        traces_additive,
+        gpu(learning_rule.A₊),
+        gpu(learning_rule.A₋),
+        gpu(learning_rule.τ₊),
+        gpu(learning_rule.τ₋),
+        gpu(learning_rule.min_weight),
+        gpu(learning_rule.max_weight),
+        learning_rule.softbound,
+        gpu(learning_rule.trace_scale),
+        learning_rule.traces_additive,
     )
 end
 
 function cpu(learning_rule::STDP)
     return STDP(
-        cpu(A₊),
-        cpu(A₋),
-        cpu(τ₊),
-        cpu(τ₋),
-        cpu(min_weight),
-        cpu(max_weight),
-        softbound,
-        cpu(trace_scale),
-        traces_additive,
+        cpu(learning_rule.A₊),
+        cpu(learning_rule.A₋),
+        cpu(learning_rule.τ₊),
+        cpu(learning_rule.τ₋),
+        cpu(learning_rule.min_weight),
+        cpu(learning_rule.max_weight),
+        learning_rule.softbound,
+        cpu(learning_rule.trace_scale),
+        learning_rule.traces_additive,
     )
 end
