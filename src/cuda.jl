@@ -8,7 +8,7 @@ function gpu(net::Network)
     return Network(
         gpu(net.neurons),
         net.batch_size,
-        net.learning_rule,
+        gpu(net.learning_rule),
         gpu(net.weight),
         gpu(net.adjacency),
         gpu(net.spikes),
@@ -26,7 +26,7 @@ function cpu(net::Network)
     return Network(
         cpu(net.neurons),
         net.batch_size,
-        net.learning_rule,
+        cpu(net.learning_rule),
         cpu(net.weight),
         cpu(net.adjacency),
         cpu(net.spikes),
@@ -43,7 +43,7 @@ end
 function gpu(net::DelayNetwork)
     return DelayNetwork(
         gpu(net.neurons),
-        net.learning_rule,
+        gpu(net.learning_rule),
         gpu(net.weight),
         gpu(net.adjacency),
         gpu(net.delay),
@@ -63,7 +63,7 @@ end
 function cpu(net::DelayNetwork)
     return DelayNetwork(
         cpu(net.neurons),
-        net.learning_rule,
+        cpu(net.learning_rule),
         cpu(net.weight),
         cpu(net.adjacency),
         cpu(net.delay),
@@ -99,5 +99,33 @@ function cpu(neuron::Izhikevich)
         cpu(neuron.c),
         cpu(neuron.d),
         cpu(neuron.v_thresh),
+    )
+end
+
+function gpu(learning_rule::STDP)
+    return STDP(
+        gpu(A₊),
+        gpu(A₋),
+        gpu(τ₊),
+        gpu(τ₋),
+        gpu(min_weight),
+        gpu(max_weight),
+        softbound,
+        gpu(trace_scale),
+        traces_additive,
+    )
+end
+
+function cpu(learning_rule::STDP)
+    return STDP(
+        cpu(A₊),
+        cpu(A₋),
+        cpu(τ₊),
+        cpu(τ₋),
+        cpu(min_weight),
+        cpu(max_weight),
+        softbound,
+        cpu(trace_scale),
+        traces_additive,
     )
 end
