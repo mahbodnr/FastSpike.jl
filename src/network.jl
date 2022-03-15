@@ -25,7 +25,7 @@ function Network(
                 batch_size,
                 nothing,
                 Array{Float64}(undef, (0, 0)),
-                Array{Float64}(undef, (0, 0)),
+                Array{Bool}(undef, (0, 0)),
                 zeros(Bool, batch_size, 0),
                 ones(Float64, batch_size, 0),
                 ones(Float64, batch_size, 0),
@@ -48,7 +48,7 @@ function Network(
                         batch_size,
                         learning_rule,
                         Array{Float64}(undef, (0, 0)),
-                        Array{Float64}(undef, (0, 0)),
+                        Array{Bool}(undef, (0, 0)),
                         zeros(Bool, batch_size, 0),
                         ones(Float64, batch_size, 0),
                         ones(Float64, batch_size, 0),
@@ -64,7 +64,7 @@ function Network(
                         batch_size,
                         learning_rule,
                         Array{Float64}(undef, (0, 0)),
-                        Array{Float64}(undef, (0, 0)),
+                        Array{Bool}(undef, (0, 0)),
                         zeros(Bool, batch_size, 0),
                         ones(Float64, batch_size, 0),
                         ones(Float64, batch_size, 0),
@@ -207,8 +207,8 @@ function _update!(
                 current += input_voltage
         end
         # update voltages
-        network.voltage[network.spikes] .= network.neurons.c  # change the voltage of spiked neurons to c
-        network.recovery[network.spikes] .+= network.neurons.d  # add d to the recovery parameter of spiked neurons
+        network.voltage[network.spikes] .= (network.spikes.*network.neurons.c)[network.spikes]  # change the voltage of spiked neurons to c #TODO: optimize for scalar values
+        network.recovery[network.spikes] .+= (network.spikes.*network.neurons.d)[network.spikes]  # add d to the recovery parameter of spiked neurons #TODO: optimize for scalar values
         network.voltage += 0.04 .* network.voltage .^ 2 + 5 .* network.voltage .+ 140 - network.recovery + current
         network.recovery += network.neurons.a .* (network.neurons.b .* network.voltage - network.recovery)
 end

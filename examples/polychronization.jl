@@ -34,7 +34,7 @@ net = DelayNetwork(
 )
 neurons = add_group!(net, N)
 # connections in neural group
-weights = [ones(Nₑ, Nₑ + Nᵢ); -5 * ones(Nᵢ, Nₑ + Nᵢ)]
+weights = [6 * ones(Nₑ, Nₑ + Nᵢ); -5 * ones(Nᵢ, Nₑ + Nᵢ)]
 weights .*= adjacency
 delay = rand(1:20, N, N)
 delay .*= adjacency
