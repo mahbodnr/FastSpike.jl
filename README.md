@@ -5,6 +5,7 @@
 A Spiking Neural Network (SNN) simulation framework
 FastSpike is designed to exploit the GPU memory in order to increase the speed of simulation as much as possible.
 Python implementation: [FastSpike](https://github.com/mahbodnr/FastSpike)
+Please refer to `examples/` for more information
 
 # Getting started
 ## Installation
