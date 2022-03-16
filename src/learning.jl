@@ -24,7 +24,7 @@ function ApplyLearningRule!(network::Network, learning_rule::STDP, softbound_dec
     e₊ = reshape(network.e₊, network.batch_size, :, 1)
     s₋ = reshape(network.spikes, network.batch_size, :, 1)
     e₋ = reshape(network.e₋, network.batch_size, 1, :)
-    weight_update = network.weight .* 0
+    weight_update = similar(network.weight)
     # Pre-Post activities
     weight_update += ein"bix,bxj->ij"(e₊, s₊)
     # Post-Pre activities
@@ -44,7 +44,7 @@ function ApplyLearningRule!(network::DelayNetwork, learning_rule::STDP, softboun
     e₊ = reshape(network.e₊, 1, :, 1)
     s₋ = reshape(network.spikes, 1, :, 1)
     e₋ = reshape(network.e₋, 1, 1, :)
-    weight_update = network.weight .* 0
+    weight_update = similar(network.weight)
     # Pre-Post activities
     weight_update += ein"bix,bxj->ij"(e₊, s₊)
     # Post-Pre activities
@@ -57,9 +57,9 @@ end
 function SymmetricalSTDP!(network::Union{Network,DelayNetwork}, learning_rule::STDP)
     network.e₊ *= exp(-network.neurons.dt / learning_rule.τ₊)
     if learning_rule.traces_additive
-        network.e₊ += learning_rule.A₊ * learning_rule.trace_scale * network.spikes
+        network.e₊ += learning_rule.A₊ * network.spikes
     else
-        network.e₊[network.spikes] .= learning_rule.A₊ * learning_rule.trace_scale
+        network.e₊[network.spikes] .= learning_rule.A₊
     end
     network.e₋ = network.e₊
     return
@@ -69,11 +69,11 @@ function AsymmetricalSTDP!(network::Union{Network,DelayNetwork}, learning_rule::
     network.e₊ *= exp(-network.neurons.dt / learning_rule.τ₊)
     network.e₋ *= exp(-network.neurons.dt / learning_rule.τ₋)
     if learning_rule.traces_additive
-        network.e₊ += learning_rule.A₊ * learning_rule.trace_scale * network.spikes
-        network.e₋ += learning_rule.A₋ * learning_rule.trace_scale * network.spikes
+        network.e₊ += learning_rule.A₊ * network.spikes
+        network.e₋ += learning_rule.A₋ * network.spikes
     else
-        network.e₊[network.spikes] .= learning_rule.A₊ * learning_rule.trace_scale
-        network.e₋[network.spikes] .= learning_rule.A₋ * learning_rule.trace_scale
+        network.e₊[network.spikes] .= learning_rule.A₊
+        network.e₋[network.spikes] .= learning_rule.A₋
     end
     return
 end
