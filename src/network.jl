@@ -18,6 +18,26 @@ end
 
 function Network(
         neurons::NeuronType,
+)
+        return Network(
+                neurons,
+                1,
+                nothing,
+                Array{Float64}(undef, (0, 0)),
+                Array{Bool}(undef, (0, 0)),
+                zeros(Bool, batch_size, 0),
+                ones(Float64, batch_size, 0),
+                ones(Float64, batch_size, 0),
+                zeros(Int64, batch_size, 0),
+                nothing,
+                nothing,
+                false,
+                Dict{String,NeuronGroup}(),
+        )
+end
+
+function Network(
+        neurons::NeuronType,
         batch_size::Int
 )
         return Network(

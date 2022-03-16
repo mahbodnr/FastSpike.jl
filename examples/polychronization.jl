@@ -54,7 +54,7 @@ function train(time)
             plot(
                 scatter(Tuple.(spiked_neurons), markersize = 1, c = :black, title = "time: $(t÷1000)s",),
                 histogram(net.weight[1:800, :][convert(Matrix{Bool}, net.adjacency)[1:800, :]], title = "Excitatory weight histogram");
-                layout = (2, 1)
+                layout = grid(4, 1, heights=[.75, .25]),
             )
             spiked_neurons = []
         end
