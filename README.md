@@ -1,13 +1,21 @@
 # FastSpike.jl
 
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://MahbodNr.github.io/FastSpike.jl/stable)
-[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://MahbodNr.github.io/FastSpike.jl/dev)
-[![Build Status](https://travis-ci.com/MahbodNr/FastSpike.jl.svg?branch=main)](https://travis-ci.com/MahbodNr/FastSpike.jl)
 
+A Spiking Neural Network (SNN) simulation framework
+FastSpike is designed to exploit the GPU memory in order to increase the speed of simulation as much as possible.
 Python implementation: [FastSpike](https://github.com/mahbodnr/FastSpike)
 
 # Getting started
 ## Installation
   ```bash
   pkg> add https://github.com/mahbodnr/FastSpike.jl
+  ```
+
+## Make a model
+  ```bash
+  using FastSpike
+  model = Network(Izhikevich("fast spiking"))
+  group_A = add_group!(model, 1000; name= "A")
+  group_B = add_group!(model, 1000; name= "B")
   ```
