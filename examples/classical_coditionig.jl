@@ -1,5 +1,4 @@
-include("../src/FastSpike.jl")
-using Main.FastSpike
+using FastSpike
 using LinearAlgebra: I
 using ProgressMeter
 using Plots
