@@ -13,7 +13,7 @@ Python implementation: [FastSpike](https://github.com/mahbodnr/FastSpike)
   ```
 
 ## Make a model
-  ```bash
+  ```julia
   using FastSpike
   model = Network(Izhikevich("fast spiking"))
   group_A = add_group!(model, 1000; name= "A")
