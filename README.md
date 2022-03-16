@@ -5,3 +5,9 @@
 [![Build Status](https://travis-ci.com/MahbodNr/FastSpike.jl.svg?branch=main)](https://travis-ci.com/MahbodNr/FastSpike.jl)
 
 Python implementation: [FastSpike](https://github.com/mahbodnr/FastSpike)
+
+# Getting started
+## Installation
+  ```bash
+  pkg> add https://github.com/mahbodnr/FastSpike.jl
+  ```
