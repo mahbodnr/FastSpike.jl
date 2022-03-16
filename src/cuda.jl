@@ -111,7 +111,6 @@ function gpu(learning_rule::STDP)
         gpu(learning_rule.min_weight),
         gpu(learning_rule.max_weight),
         learning_rule.softbound,
-        gpu(learning_rule.trace_scale),
         learning_rule.traces_additive,
     )
 end
@@ -125,7 +124,6 @@ function cpu(learning_rule::STDP)
         cpu(learning_rule.min_weight),
         cpu(learning_rule.max_weight),
         learning_rule.softbound,
-        cpu(learning_rule.trace_scale),
         learning_rule.traces_additive,
     )
 end
