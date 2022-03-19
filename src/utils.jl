@@ -1,6 +1,6 @@
 function load(filename::AbstractString)
         return load_object(filename)
-    end
+end
 
 function pad1D(X::AbstractArray, n::Int)
         return [X zeros(eltype(X), (size(X, 1), n))]
@@ -11,17 +11,17 @@ function pad2D(X::AbstractArray, n::Int)
 end
 
 function regularActivity(N::Int, time::Int, frequency::Real; delay = 0)
-        period = repeat([1; repeat([0],1000÷frequency-1)...], 1,N)
-        activity = repeat(period, Int(ceil(time*frequency/1000)))
-        delayed_activity = [zeros(delay,N); activity][1:time, :]
+        period = repeat([1; repeat([0], 1000 ÷ frequency - 1)...], 1, N)
+        activity = repeat(period, Int(ceil(time * frequency / 1000)))
+        delayed_activity = [zeros(delay, N); activity][1:time, :]
         return delayed_activity
 end
 
-function randomActivity(N::Int, time::Int, frequency::Real; delay = 0, seed= nothing)
+function randomActivity(N::Int, time::Int, frequency::Real; delay = 0, seed = nothing)
         if !isnothing(seed)
                 Random.seed!(seed)
         end
-        activity = rand(time, N) .< (frequency/1000)
-        delayed_activity = [zeros(delay,N); activity][1:time, :]
+        activity = rand(time, N) .< (frequency / 1000)
+        delayed_activity = [zeros(delay, N); activity][1:time, :]
         return delayed_activity
 end

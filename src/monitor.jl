@@ -13,7 +13,7 @@ mutable struct WeightMonitor
     weight::AbstractArray
 end
 
-function Monitor(network::Union{Network,DelayNetwork}; record_weight = false)
+function Monitor(network::Union{Network,DelayNetwork}; record_weight=false)
     if record_weight
         return WeightMonitor(network, [], [], [])
     else
@@ -63,7 +63,16 @@ function save(monitor::Union{Monitor,WeightMonitor}, filename::AbstractString)
     save_object(filename, monitor)
 end
 
-function PSP(monitor::WeightMonitor; time = :, from = :, to = :)
+
+function raster(monitor::Union{Monitor,WeightMonitor})
+    spikes_array = convert(Array, VectorOfArray(monitor.spikes)) #size: batch_size, #neurons, time
+    return [
+        [(i[2], i[3]) for i in findall(spikes_array) if i[1] == batch]
+        for batch in 1:size(spikes_array)[1]
+    ]
+end
+
+function PSP(monitor::WeightMonitor; time=:, from=:, to=:)
     if typeof(from) == NeuronGroup
         from = from.idx
     end
@@ -80,7 +89,7 @@ function PSP(monitor::WeightMonitor; time = :, from = :, to = :)
 end
 
 
-function EPSP(monitor::WeightMonitor; time = :, from = :, to = :)
+function EPSP(monitor::WeightMonitor; time=:, from=:, to=:)
     if typeof(from) == NeuronGroup
         from = from.idx
     end
@@ -96,7 +105,7 @@ function EPSP(monitor::WeightMonitor; time = :, from = :, to = :)
     return PermutedDimsArray(total_EPSP[:, to, time], (3, 1, 2)) #size(PSP): time, batch_size, #neurons
 end
 
-function IPSP(monitor::WeightMonitor; time = :, from = :, to = :)
+function IPSP(monitor::WeightMonitor; time=:, from=:, to=:)
     if typeof(from) == NeuronGroup
         from = from.idx
     end
