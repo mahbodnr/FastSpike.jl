@@ -66,7 +66,8 @@ function train(time)
                 histogram(
                     net.weight[excitatory, :][net.adjacency[excitatory, :]],
                     title="Excitatory weight histogram", xlims=(0, 10));
-                layout=grid(2, 1, heights=[0.75, 0.25])
+                layout=grid(2, 1, heights=[0.75, 0.25]),
+                legend=false
             )
             savefig("network$(t)s.png")
             # save (overwrite) the model 
