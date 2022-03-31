@@ -23,11 +23,11 @@ function Network(
                 neurons,
                 1,
                 nothing,
-                Array{Float64}(undef, (0, 0)),
+                Array{Float32}(undef, (0, 0)),
                 Array{Bool}(undef, (0, 0)),
                 zeros(Bool, 1, 0),
-                ones(Float64, 1, 0),
-                ones(Float64, 1, 0),
+                ones(Float32, 1, 0),
+                ones(Float32, 1, 0),
                 zeros(Int64, 1, 0),
                 nothing,
                 nothing,
@@ -44,11 +44,11 @@ function Network(
                 neurons,
                 batch_size,
                 nothing,
-                Array{Float64}(undef, (0, 0)),
+                Array{Float32}(undef, (0, 0)),
                 Array{Bool}(undef, (0, 0)),
                 zeros(Bool, batch_size, 0),
-                ones(Float64, batch_size, 0),
-                ones(Float64, batch_size, 0),
+                ones(Float32, batch_size, 0),
+                ones(Float32, batch_size, 0),
                 zeros(Int64, batch_size, 0),
                 nothing,
                 nothing,
@@ -67,11 +67,11 @@ function Network(
                         neurons,
                         batch_size,
                         learning_rule,
-                        Array{Float64}(undef, (0, 0)),
+                        Array{Float32}(undef, (0, 0)),
                         Array{Bool}(undef, (0, 0)),
                         zeros(Bool, batch_size, 0),
-                        ones(Float64, batch_size, 0),
-                        ones(Float64, batch_size, 0),
+                        ones(Float32, batch_size, 0),
+                        ones(Float32, batch_size, 0),
                         zeros(Int64, batch_size, 0),
                         zeros(Bool, batch_size, 0),
                         nothing,
@@ -83,11 +83,11 @@ function Network(
                         neurons,
                         batch_size,
                         learning_rule,
-                        Array{Float64}(undef, (0, 0)),
+                        Array{Float32}(undef, (0, 0)),
                         Array{Bool}(undef, (0, 0)),
                         zeros(Bool, batch_size, 0),
-                        ones(Float64, batch_size, 0),
-                        ones(Float64, batch_size, 0),
+                        ones(Float32, batch_size, 0),
+                        ones(Float32, batch_size, 0),
                         zeros(Int64, batch_size, 0),
                         zeros(Bool, batch_size, 0),
                         zeros(Bool, batch_size, 0),
@@ -97,7 +97,7 @@ function Network(
         end
 end
 
-function add_group!(network::Network, N::Int; name::Union{String,Nothing} = nothing)
+function add_group!(network::Network, N::Int; name::Union{String,Nothing}=nothing)
         Group = NeuronGroup(N, size(network.weight, 1)+1:size(network.weight, 1)+N)
 
         network.weight = pad2D(network.weight, N)
@@ -166,8 +166,8 @@ end
 
 function run!(
         network::Network;
-        input_spikes::Union{AbstractMatrix{Bool},Nothing} = nothing,
-        input_voltage::Union{AbstractMatrix,Nothing} = nothing
+        input_spikes::Union{AbstractMatrix{Bool},Nothing}=nothing,
+        input_voltage::Union{AbstractMatrix,Nothing}=nothing
 )
         _update!(network, input_spikes, input_voltage)
         # Learning process
@@ -252,7 +252,7 @@ function reset!(network::Network)
         return
 end
 
-function makeInput(network::Network, time::Integer, inputs::Dict{NeuronGroup}, type = Float64)
+function makeInput(network::Network, time::Integer, inputs::Dict{NeuronGroup}, type=Float32)
         input = zeros(type, time, size(network.weight)[1])
         for group_input in inputs
                 input[:, group_input[1].idx] .= group_input[2]
