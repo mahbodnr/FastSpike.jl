@@ -61,7 +61,7 @@ function train(time)
             plot(
                 scatter(
                     raster(monitor)[1], markersize=1, c=:black,
-                    title="time: $(t)s, #Spikes= $(sum(sum(monitor.spikes))), Mean voltage= $(round(mean(mean(monitor.voltage)));digits = 3)",),
+                    title="time: $(t)s, #Spikes= $(sum(sum(monitor.spikes))), Mean voltage= $(round(mean(mean(monitor.voltage));digits = 3))",),
                 histogram(
                     net.weight[excitatory, :][net.adjacency[excitatory, :]],
                     title="Excitatory weight histogram", xlims=(0, 10));
