@@ -24,7 +24,7 @@ function ApplyLearningRule!(network::Network, learning_rule::STDP, softbound_dec
     e₊ = reshape(network.e₊, network.batch_size, :, 1)
     s₋ = reshape(network.spikes, network.batch_size, :, 1)
     e₋ = reshape(network.e₋, network.batch_size, 1, :)
-    weight_update = fill!(similar(net.weight), 0)
+    weight_update = fill!(similar(network.weight), 0)
     # Pre-Post activities
     weight_update += ein"bix,bxj->ij"(e₊, s₊)
     # Post-Pre activities
@@ -44,7 +44,7 @@ function ApplyLearningRule!(network::DelayNetwork, learning_rule::STDP, softboun
     e₊ = reshape(network.e₊, 1, :, 1)
     s₋ = reshape(network.spikes, 1, :, 1)
     e₋ = reshape(network.e₋, 1, 1, :)
-    weight_update = fill!(similar(net.weight), 0)
+    weight_update = fill!(similar(network.weight), 0)
     # Pre-Post activities
     weight_update += ein"bix,bxj->ij"(e₊, s₊)
     # Post-Pre activities
