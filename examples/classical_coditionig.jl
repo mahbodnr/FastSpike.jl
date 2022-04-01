@@ -1,5 +1,4 @@
 using FastSpike
-using LinearAlgebra: I
 using ProgressMeter
 using Plots
 using Statistics
