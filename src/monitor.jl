@@ -1,5 +1,4 @@
 mutable struct Monitor
-    network::Union{Network,DelayNetwork}
     spikes::AbstractArray
     voltage::AbstractArray
     recovery::AbstractArray
@@ -7,33 +6,32 @@ mutable struct Monitor
     # e₋::AbstractArray
 end
 mutable struct WeightMonitor
-    network::Union{Network,DelayNetwork}
     spikes::AbstractArray
     voltage::AbstractArray
     weight::AbstractArray
 end
 
-function Monitor(network::Union{Network,DelayNetwork}; record_weight=false)
+function Monitor(; record_weight=false)
     if record_weight
-        return WeightMonitor(network, [], [], [])
+        return WeightMonitor([], [], [])
     else
-        return Monitor(network, [], [], [])
+        return Monitor([], [], [])
     end
 end
 
-function record!(monitor::Monitor)
-    push!(monitor.spikes, monitor.network.spikes |> copy |> cpu)
-    push!(monitor.voltage, monitor.network.voltage |> copy |> cpu)
-    if typeof(monitor.network.neurons) <: Izhikevich
-        push!(monitor.recovery, monitor.network.recovery |> copy |> cpu)
+function record!(monitor::Monitor, network::Network)
+    push!(monitor.spikes, network.spikes |> copy |> cpu)
+    push!(monitor.voltage, network.voltage |> copy |> cpu)
+    if typeof(network.neurons) <: Izhikevich
+        push!(monitor.recovery, network.recovery |> copy |> cpu)
     end
     return
 end
 
-function record!(monitor::WeightMonitor)
-    push!(monitor.spikes, monitor.network.spikes |> copy |> cpu)
-    push!(monitor.voltage, monitor.network.voltage |> copy |> cpu)
-    push!(monitor.weight, monitor.network.weight |> copy |> cpu)
+function record!(monitor::WeightMonitor, network::Network)
+    push!(monitor.spikes, network.spikes |> copy |> cpu)
+    push!(monitor.voltage, network.voltage |> copy |> cpu)
+    push!(monitor.weight, network.weight |> copy |> cpu)
     return
 end
 
@@ -52,11 +50,11 @@ function reset!(monitor::WeightMonitor)
 end
 
 function Base.getindex(monitor::Monitor, idx::Union{UnitRange{Int},Vector{Int}})
-    return Monitor(monitor.network[idx], monitor.spikes[:, :, idx], monitor.voltage[:, :, idx])
+    return Monitor(monitor.spikes[:, :, idx], monitor.voltage[:, :, idx], monitor.recovery[:, :, idx])
 end
 
 function Base.getindex(monitor::WeightMonitor, idx::Union{UnitRange{Int},Vector{Int}})
-    return WeightMonitor(monitor.network[idx], monitor.spikes[:, :, idx], monitor.voltage[:, :, idx], monitor.WeightMonitor[:, idx, idx])
+    return WeightMonitor(monitor.spikes[:, :, idx], monitor.voltage[:, :, idx], monitor.WeightMonitor[:, idx, idx])
 end
 
 function save(monitor::Union{Monitor,WeightMonitor}, filename::AbstractString)

@@ -40,7 +40,7 @@ else # Or construct a new network
     connect!(net, neurons, neurons, connection)
 end
 # Define Monitor to record network activities
-monitor = Monitor(net)
+monitor = Monitor()
 
 net = net |> gpu
 # Define training function
@@ -55,7 +55,7 @@ function train(time)
         if t == 1 || t % 10 == 0 # Record each 10 seconds 
             for ms = 1:1000 # each second
                 run!(net; input_voltage=random_input[ms:ms, :] |> gpu)
-                record!(monitor)
+                record!(monitor, net)
             end
             # Save recordings
             plot(
