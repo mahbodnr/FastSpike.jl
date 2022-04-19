@@ -126,8 +126,16 @@ end
 
 function _add_neuron_features!(network::Network{Izhikevich}, N::Int)
         network.voltage = pad1D(network.voltage, N)
-        fill!(network.voltage, network.neurons.c)
-        network.recovery = network.neurons.b .* network.voltage
+        if typeof(network.neurons.c) <: AbstractArray
+                network.voltage = network.neurons.c[:, 1:size(network.voltage, 2)]
+        else
+                fill!(network.voltage, network.neurons.c)
+        end
+        if typeof(network.neurons.b) <: AbstractArray
+                network.recovery = network.neurons.b[:, 1:size(network.voltage, 2)] .* network.voltage
+        else
+                network.recovery = network.neurons.b .* network.voltage
+        end
 end
 
 

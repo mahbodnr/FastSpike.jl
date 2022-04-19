@@ -5,6 +5,7 @@ using Statistics
 
 const time = 3600 #seconds
 const N = 1000
+const rec_every = 60 #seconds
 const group_size = 50
 
 
@@ -45,14 +46,16 @@ monitor = Monitor()
 net = net |> gpu
 # Define training function
 function train(time)
+    dig_pad = Int(ceil(log10(time)))
+    mkdir("plots")
     @showprogress 1 "training " for t = 1:time
         # Make thalamic radom input
         random_input = zeros(1000, N)
-        for t = 1:1000
-            random_input[t, rand(1:N)] = 20
+        for t_ = 1:1000
+            random_input[t_, rand(1:N)] = 20
         end
         # Simulate for 1000 ms
-        if t == 1 || t % 10 == 0 # Record each 10 seconds 
+        if t == 1 || t % rec_every == 0 # Record 
             for ms = 1:1000 # each second
                 run!(net; input_voltage=random_input[ms:ms, :] |> gpu)
                 record!(monitor, net)
@@ -68,9 +71,9 @@ function train(time)
                 layout=grid(2, 1, heights=[0.75, 0.25]),
                 legend=false
             )
-            savefig("network$(t)s.png")
+            savefig("plots/$(lpad(t,dig_pad,"0"))s.png")
             # save (overwrite) the model 
-            save(net, "network.jl")
+            save(net, "network.jld2")
             reset!(monitor)
         else
             for ms = 1:1000 # each second
@@ -78,7 +81,7 @@ function train(time)
             end
         end
     end
-    save(net, "network.jl")
+    save(net, "network.jld2")
 end
 
 # Run
