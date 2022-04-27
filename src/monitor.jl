@@ -49,25 +49,17 @@ function reset!(monitor::WeightMonitor)
     return
 end
 
-function Base.getindex(monitor::Monitor, idx::Union{UnitRange{Int},Vector{Int}})
-    return Monitor(monitor.spikes[:, :, idx], monitor.voltage[:, :, idx], monitor.recovery[:, :, idx])
-end
-
-function Base.getindex(monitor::WeightMonitor, idx::Union{UnitRange{Int},Vector{Int}})
-    return WeightMonitor(monitor.spikes[:, :, idx], monitor.voltage[:, :, idx], monitor.WeightMonitor[:, idx, idx])
+function Base.get(monitor::Union{Monitor,WeightMonitor}, field::Symbol)
+    return convert(Array, VectorOfArray(getfield(monitor, field))) # size: batch_size, #neurons, time
 end
 
 function save(monitor::Union{Monitor,WeightMonitor}, filename::AbstractString)
     save_object(filename, monitor)
 end
 
-
-function raster(monitor::Union{Monitor,WeightMonitor})
-    spikes_array = convert(Array, VectorOfArray(monitor.spikes)) #size: batch_size, #neurons, time
-    return [
-        [(i[2], i[3]) for i in findall(spikes_array) if i[1] == batch]
-        for batch in 1:size(spikes_array)[1]
-    ]
+function raster(monitor::Union{Monitor,WeightMonitor}; batch=1)
+    spikes_array = get(monitor, :spikes)
+    return [(i[3], i[2]) for i in findall(spikes_array) if i[1] == batch]
 end
 
 function PSP(monitor::WeightMonitor; time=:, from=:, to=:)
@@ -77,8 +69,8 @@ function PSP(monitor::WeightMonitor; time=:, from=:, to=:)
     if typeof(to) == NeuronGroup
         to = to.idx
     end
-    weight_array = convert(Array, VectorOfArray(monitor.weight)) #size: w1, w2, time
-    spikes_array = convert(Array, VectorOfArray(monitor.spikes)) #size: batch_size, #neurons, time
+    weight_array = get(monitor, :weight) #size: w1, w2, time
+    spikes_array = get(monitor, :spikes) #size: batch_size, #neurons, time
     spikes_from_group = zeros(size(spikes_array))
     spikes_from_group[:, from, :] .= spikes_array[:, from, :]
 
@@ -95,8 +87,8 @@ function EPSP(monitor::WeightMonitor; time=:, from=:, to=:)
         to = to.idx
     end
     pos(x) = ifelse(x > 0, x, 0)
-    pos_weight = map(pos, convert(Array, VectorOfArray(monitor.weight))) #size: w1, w2, time
-    spikes_array = convert(Array, VectorOfArray(monitor.spikes)) #size: batch_size, #neurons, time
+    pos_weight = map(pos, get(monitor, :weight)) #size: w1, w2, time
+    spikes_array = get(monitor, :spikes) #size: batch_size, #neurons, time
     spikes_from_group = zeros(size(spikes_array))
     spikes_from_group[:, from, :] .= spikes_array[:, from, :]
     total_EPSP = spikes_from_group ⊠ pos_weight #size : batch_size, #neurons, time 
@@ -111,8 +103,8 @@ function IPSP(monitor::WeightMonitor; time=:, from=:, to=:)
         to = to.idx
     end
     neg(x) = ifelse(x < 0, x, 0)
-    neg_weight = map(neg, convert(Array, VectorOfArray(monitor.weight))) #size: w1, w2, time
-    spikes_array = convert(Array, VectorOfArray(monitor.spikes)) #size: batch_size, #neurons, time
+    neg_weight = map(neg, get(monitor, :weight)) #size: w1, w2, time
+    spikes_array = et(monitor, :spikes) #size: batch_size, #neurons, time
     spikes_from_group = zeros(size(spikes_array))
     spikes_from_group[:, from, :] .= spikes_array[:, from, :]
     total_EPSP = spikes_from_group ⊠ neg_weight #size : batch_size, #neurons, time 

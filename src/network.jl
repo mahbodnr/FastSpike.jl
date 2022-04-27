@@ -177,7 +177,14 @@ function run!(
         input_spikes::Union{AbstractMatrix{Bool},Nothing}=nothing,
         input_voltage::Union{AbstractMatrix,Nothing}=nothing
 )
-        _update!(network, input_spikes, input_voltage)
+        # Evoke spikes
+        network.spikes = network.voltage .>= network.neurons.v_thresh
+        # External spikes
+        if !isnothing(input_spikes)
+                network.spikes = network.spikes .| input_spikes
+        end
+        # Supress neurons #TODO     
+        _update!(network, input_voltage)
         # Learning process
         if network.learning # Apply the learning rule and update weights
                 train!(network, network.learning_rule;)
@@ -188,7 +195,6 @@ end
 
 function _update!(
         network::Network{LIF},
-        input_spikes::Union{AbstractMatrix{Bool},Nothing},
         input_voltage::Union{AbstractMatrix,Nothing}
 )
         # Decay voltages.
@@ -203,16 +209,12 @@ function _update!(
                 input_voltage[network.refractory.>0] .= 0.0
                 network.voltage += input_voltage
         end
+        # Get current
+        current = network.spikes * network.weight  # + network.bias #TODO
         # update voltages
-        network.voltage += network.spikes * network.weight  # + network.bias
+        network.voltage += current
         network.voltage[network.refractory.>0] .= network.neurons.v_rest # reset the voltage of the neurons in the refractory period
         network.voltage[network.spikes] .= network.neurons.v_reset  # change the voltage of spiked neurons to v_reset
-        # Evoke spikes
-        network.spikes = network.voltage .>= network.neurons.v_thresh
-        # External spikes
-        if !isnothing(input_spikes)
-                network.spikes = network.spikes .| input_spikes
-        end
         # Update refractory timepoints
         network.refractory .-= network.neurons.dt
         network.refractory[network.spikes] .= network.neurons.refractory_period
@@ -220,21 +222,15 @@ end
 
 function _update!(
         network::Network{Izhikevich},
-        input_spikes::Union{AbstractMatrix{Bool},Nothing},
         input_voltage::Union{AbstractMatrix,Nothing}
 )
-        # Evoke spikes
-        network.spikes = network.voltage .>= network.neurons.v_thresh
-        # External spikes
-        if !isnothing(input_spikes)
-                network.spikes = network.spikes .| input_spikes
-        end
-        current = network.spikes * network.weight
         # External voltage:
         if !isnothing(input_voltage)
                 current += input_voltage
         end
-        # update voltages
+        # Get current
+        current = network.spikes * network.weight
+        # Update voltages
         network.voltage[network.spikes] .= (network.spikes.*network.neurons.c)[network.spikes]  # change the voltage of spiked neurons to c #TODO: optimize for scalar values
         network.recovery[network.spikes] .+= (network.spikes.*network.neurons.d)[network.spikes]  # add d to the recovery parameter of spiked neurons #TODO: optimize for scalar values
         network.voltage += 0.04 .* network.voltage .^ 2 + 5 .* network.voltage .+ 140 - network.recovery + current

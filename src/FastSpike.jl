@@ -13,7 +13,7 @@ using OMEinsum
 Logging.disable_logging(Logging.Debug)
 
 
-export add_group!, connect!, run!, train!, reset!, pad1D, pad2D, record!, save, load,
+export add_group!, connect!, run!, train!, reset!, pad1D, pad2D, record!, get, save, load,
         gpu, cpu, randomConnection, regularActivity, randomActivity, makeInput,
         raster, PSP, EPSP, IPSP, EI
 export Network, DelayNetwork, LearningRule, NeuronType, NeuronGroup, LIF, Izhikevich,
