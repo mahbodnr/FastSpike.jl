@@ -226,10 +226,10 @@ function _update!(
 )
         # External voltage:
         if !isnothing(input_voltage)
-                current += input_voltage
+                current = input_voltage
         end
         # Get current
-        current = network.spikes * network.weight
+        current += network.spikes * network.weight
         # Update voltages
         network.voltage[network.spikes] .= (network.spikes.*network.neurons.c)[network.spikes]  # change the voltage of spiked neurons to c #TODO: optimize for scalar values
         network.recovery[network.spikes] .+= (network.spikes.*network.neurons.d)[network.spikes]  # add d to the recovery parameter of spiked neurons #TODO: optimize for scalar values
