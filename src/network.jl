@@ -230,11 +230,16 @@ function _update!(
         end
         # Get current
         current += network.spikes * network.weight
-        # Update voltages
+        # Update voltages (spiked neurons)
         network.voltage[network.spikes] .= (network.spikes.*network.neurons.c)[network.spikes]  # change the voltage of spiked neurons to c #TODO: optimize for scalar values
         network.recovery[network.spikes] .+= (network.spikes.*network.neurons.d)[network.spikes]  # add d to the recovery parameter of spiked neurons #TODO: optimize for scalar values
-        network.voltage += 0.04 .* network.voltage .^ 2 + 5 .* network.voltage .+ 140 - network.recovery + current
-        network.recovery += network.neurons.a .* (network.neurons.b .* network.voltage - network.recovery)
+        # Update voltages
+        network.voltage += network.neurons.dt .* (
+                0.04 .* network.voltage .^ 2 + 5 .* network.voltage .+ 140 - network.recovery + current
+        )
+        network.recovery += network.neurons.dt .* (
+                network.neurons.a .* (network.neurons.b .* network.voltage - network.recovery)
+        )
 end
 
 

@@ -1,11 +1,13 @@
-mutable struct Monitor
+abstract type MonitorActivity end
+
+mutable struct Monitor <: MonitorActivity
     spikes::AbstractArray
     voltage::AbstractArray
     recovery::AbstractArray
     # e₊::AbstractArray
     # e₋::AbstractArray
 end
-mutable struct WeightMonitor
+mutable struct WeightMonitor <: MonitorActivity
     spikes::AbstractArray
     voltage::AbstractArray
     weight::AbstractArray
@@ -49,17 +51,21 @@ function reset!(monitor::WeightMonitor)
     return
 end
 
-function Base.get(monitor::Union{Monitor,WeightMonitor}, field::Symbol)
+function Base.get(monitor::MonitorActivity, field::Symbol)
     return convert(Array, VectorOfArray(getfield(monitor, field))) # size: batch_size, #neurons, time
 end
 
-function save(monitor::Union{Monitor,WeightMonitor}, filename::AbstractString)
+function save(monitor::MonitorActivity, filename::AbstractString)
     save_object(filename, monitor)
 end
 
-function raster(monitor::Union{Monitor,WeightMonitor}; batch=1)
+function raster(monitor::MonitorActivity; batch=1)
     spikes_array = get(monitor, :spikes)
     return [(i[3], i[2]) for i in findall(spikes_array) if i[1] == batch]
+end
+
+function Base.getindex(monitor::MonitorActivity, idx::Union{UnitRange{Int},Vector{Int},Int})
+    typeof(monitor)([getfield(monitor, i)[idx] for i in fieldnames(typeof(monitor))]...)
 end
 
 function PSP(monitor::WeightMonitor; time=:, from=:, to=:)

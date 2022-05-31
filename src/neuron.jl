@@ -3,16 +3,16 @@ export NeuronType, LIF, Izhikevich, NeuronGroup
 abstract type NeuronType end
 
 struct LIF <: NeuronType
-    dt::Int
+    dt::Real
     v_thresh::Real
     v_rest::Real
     v_reset::Real
     refractory_period::Int
     voltage_decay_factor::Real
 
-    function LIF(dt::Int)
+    function LIF(dt::Real)
         new(
-            UInt(dt),
+            dt,
             -52.0,
             -65.0,
             -65.0,
@@ -23,7 +23,7 @@ struct LIF <: NeuronType
 end
 
 struct Izhikevich <: NeuronType
-    dt::Int
+    dt::Real
     a::Union{Real,AbstractMatrix}
     b::Union{Real,AbstractMatrix}
     c::Union{Real,AbstractMatrix}
@@ -32,10 +32,10 @@ struct Izhikevich <: NeuronType
 end
 
 
-function Izhikevich(type::String; dt = 1)
+function Izhikevich(type::String; dt=1)
     if type == "RS" || type == "regular spiking"
         Izhikevich(
-            UInt(dt),
+            dt,
             0.02,
             0.2,
             -65.0,
@@ -44,7 +44,7 @@ function Izhikevich(type::String; dt = 1)
         )
     elseif type == "IB" || type == "intrinsically bursting"
         Izhikevich(
-            UInt(dt),
+            dt,
             0.02,
             0.2,
             -55.0,
@@ -53,7 +53,7 @@ function Izhikevich(type::String; dt = 1)
         )
     elseif type == "CH" || type == "chattering"
         Izhikevich(
-            UInt(dt),
+            dt,
             0.02,
             0.2,
             -50.0,
@@ -62,7 +62,7 @@ function Izhikevich(type::String; dt = 1)
         )
     elseif type == "FS" || type == "fast spiking"
         Izhikevich(
-            UInt(dt),
+            dt,
             0.1,
             0.2,
             -65.0,
@@ -71,7 +71,7 @@ function Izhikevich(type::String; dt = 1)
         )
     elseif type == "LTS" || type == "low-threshold spiking"
         Izhikevich(
-            UInt(dt),
+            dt,
             0.02,
             0.25,
             -65.0,
@@ -80,7 +80,7 @@ function Izhikevich(type::String; dt = 1)
         )
     elseif type == "TC" || type == "thalamo-cortical"
         Izhikevich(
-            UInt(dt),
+            dt,
             0.02,
             0.25,
             -65.0,
@@ -89,7 +89,7 @@ function Izhikevich(type::String; dt = 1)
         )
     elseif type == "RZ" || type == "resonator"
         Izhikevich(
-            UInt(dt),
+            dt,
             0.1,
             0.26,
             -65.0,
