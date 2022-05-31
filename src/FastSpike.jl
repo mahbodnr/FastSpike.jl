@@ -2,6 +2,7 @@ module FastSpike
 
 using Logging
 Logging.disable_logging(Logging.Info) # ignore "info" logs
+import Base.@kwdef
 using LinearAlgebra
 using Random
 using RecursiveArrayTools

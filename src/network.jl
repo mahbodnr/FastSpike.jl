@@ -1,113 +1,51 @@
 export Network
 
-mutable struct Network{T<:NeuronType}
+""" 
+# Network
+Network structs are used to run simulations. It contains all neurons and connections.
+# Arguments
+- `neurons::NeuronType`
+- `batch_size::Integer=1`
+...
+- `weight::AbstractArray`: Final size= (#neurons, #neurons)
+- `adjacency::AbstractArray`: Final size= (#neurons, #neurons)
+- `spikes::AbstractArray`: Final size= (Batch size, #neurons)
+- `voltage::AbstractArray`: Final size= (Batch size, #neurons)
+- `recovery::AbstractArray`: Membrane recovery variable, only applicable to Izhikevich neurons 
+- `refractory::AbstractArray`: Refractory period, only applicable to LIF neurons. Final size= (Batch size, #neurons)
+...
+"""
+@kwdef mutable struct Network{T<:NeuronType}
         neurons::T
-        batch_size::Int
-        learning_rule::Union{LearningRule,Nothing}
-        weight::AbstractArray # size: (N, N)
-        adjacency::AbstractArray # size: (N, N)
-        spikes::AbstractArray # size: (Batch size, N)
-        voltage::AbstractArray # size: (Batch size, N)
-        recovery::AbstractArray # membrane recovery variable, only applicable to Izhikevich neurons 
-        refractory::AbstractArray # refractory period size: (Batch size, N), only applicable to LIF neurons 
-        e₊::Union{AbstractArray,Nothing}
-        e₋::Union{AbstractArray,Nothing}
-        learning::Bool
-        groups::Dict{String,NeuronGroup}
-end
-
-function Network(
-        neurons::NeuronType,
-)
-        return Network(
-                neurons,
-                1,
-                nothing,
-                Array{Float64}(undef, (0, 0)),
-                Array{Bool}(undef, (0, 0)),
-                zeros(Bool, 1, 0),
-                ones(Float64, 1, 0),
-                ones(Float64, 1, 0),
-                zeros(Int64, 1, 0),
-                nothing,
-                nothing,
-                false,
-                Dict{String,NeuronGroup}(),
-        )
-end
-
-function Network(
-        neurons::NeuronType,
-        batch_size::Int
-)
-        return Network(
-                neurons,
-                batch_size,
-                nothing,
-                Array{Float64}(undef, (0, 0)),
-                Array{Bool}(undef, (0, 0)),
-                zeros(Bool, batch_size, 0),
-                ones(Float64, batch_size, 0),
-                ones(Float64, batch_size, 0),
-                zeros(Int64, batch_size, 0),
-                nothing,
-                nothing,
-                false,
-                Dict{String,NeuronGroup}(),
-        )
-end
-
-function Network(
-        neurons::NeuronType,
-        batch_size::Int,
-        learning_rule::Union{LearningRule,Nothing}
-)
-        if learning_rule.τ₊ == learning_rule.τ₋ && learning_rule.A₊ == learning_rule.A₋
-                return Network(
-                        neurons,
-                        batch_size,
-                        learning_rule,
-                        Array{Float64}(undef, (0, 0)),
-                        Array{Bool}(undef, (0, 0)),
-                        zeros(Bool, batch_size, 0),
-                        ones(Float64, batch_size, 0),
-                        ones(Float64, batch_size, 0),
-                        zeros(Int64, batch_size, 0),
-                        zeros(Bool, batch_size, 0),
-                        nothing,
-                        true,
-                        Dict{String,NeuronGroup}(),
-                )
-        else
-                return Network(
-                        neurons,
-                        batch_size,
-                        learning_rule,
-                        Array{Float64}(undef, (0, 0)),
-                        Array{Bool}(undef, (0, 0)),
-                        zeros(Bool, batch_size, 0),
-                        ones(Float64, batch_size, 0),
-                        ones(Float64, batch_size, 0),
-                        zeros(Int64, batch_size, 0),
-                        zeros(Bool, batch_size, 0),
-                        zeros(Bool, batch_size, 0),
-                        true,
-                        Dict{String,NeuronGroup}(),
-                )
+        batch_size::Int = 1
+        learning_rule::Union{LearningRule,Nothing} = nothing
+        weight::AbstractArray = Array{Float64}(undef, (0, 0))
+        adjacency::AbstractArray = Array{Float64}(undef, (0, 0))
+        spikes::AbstractArray = zeros(Bool, 1, 0)
+        voltage::AbstractArray = ones(Float32, 1, 0)
+        recovery::AbstractArray = ones(Float32, 1, 0)
+        refractory::AbstractArray = zeros(Int32, 1, 0)
+        e₊::Union{AbstractArray,Nothing} = zeros(Float32, 1, 0)
+        e₋::Union{AbstractArray,Nothing} = zeros(Float32, 1, 0)
+        learning::Bool = begin
+                if isnothing(learning_rule)
+                        false
+                else
+                        true
+                end
         end
+        groups::Dict{String,NeuronGroup} = Dict{String,NeuronGroup}()
 end
+
+Network(neurons) = Network(neurons=neurons)
 
 function add_group!(network::Network, N::Int; name::Union{String,Nothing}=nothing)
         Group = NeuronGroup(N, size(network.weight, 1)+1:size(network.weight, 1)+N)
 
         network.weight = pad2D(network.weight, N)
         network.adjacency = pad2D(network.adjacency, N)
-        if !isnothing(network.e₊)
-                network.e₊ = pad1D(network.e₊, N)
-        end
-        if !isnothing(network.e₋)
-                network.e₋ = pad1D(network.e₋, N)
-        end
+        network.e₊ = pad1D(network.e₊, N)
+        network.e₋ = pad1D(network.e₋, N)
         network.spikes = pad1D(network.spikes, N)
         _add_neuron_features!(network, N)
         if isnothing(name)
@@ -252,12 +190,8 @@ function reset!(network::Network)
                 fill!(network.voltage, network.neurons.v_rest)
         end
         fill!(network.refractory, 0)
-        if !isnothing(network.e₊)
-                fill!(network.e₊, 0)
-        end
-        if !isnothing(network.e₋)
-                fill!(network.e₋, 0)
-        end
+        fill!(network.e₊, 0)
+        fill!(network.e₋, 0)
         return
 end
 
@@ -274,14 +208,8 @@ function save(network::Network, filename::AbstractString)
 end
 
 function Base.getindex(network::Network, idx::Union{UnitRange{Int},Vector{Int}})
-        new_e₊ = network.e₊
-        new_e₋ = network.e₋
-        if !isnothing(new_e₊)
-                new_e₊ = new_e₊[:, idx]
-        end
-        if !isnothing(new_e₋)
-                new_e₋ = new_e₋[:, idx]
-        end
+        new_e₊ = new_e₊[:, idx]
+        new_e₋ = new_e₋[:, idx]
         return Network(
                 network.neurons,
                 network.batch_size,
