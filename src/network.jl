@@ -172,9 +172,11 @@ function _update!(
         network.voltage[network.spikes] .= (network.spikes.*network.neurons.c)[network.spikes]  # change the voltage of spiked neurons to c #TODO: optimize for scalar values
         network.recovery[network.spikes] .+= (network.spikes.*network.neurons.d)[network.spikes]  # add d to the recovery parameter of spiked neurons #TODO: optimize for scalar values
         # Update voltages
-        network.voltage += network.neurons.dt .* (
-                0.04 .* network.voltage .^ 2 + 5 .* network.voltage .+ 140 - network.recovery + current
-        )
+        for _ in 1:network.neurons.runge_kutta_order
+                network.voltage += (network.neurons.dt / network.neurons.runge_kutta_order) .* (
+                        0.04 .* network.voltage .^ 2 + 5 .* network.voltage .+ 140 - network.recovery + current
+                )
+        end
         network.recovery += network.neurons.dt .* (
                 network.neurons.a .* (network.neurons.b .* network.voltage - network.recovery)
         )
