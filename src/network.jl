@@ -125,7 +125,7 @@ function run!(
         _update!(network, input_voltage)
         # Learning process
         if network.learning # Apply the learning rule and update weights
-                train!(network, network.learning_rule;)
+                train!(network)
         end
         return network.spikes, network.voltage
 end
