@@ -10,7 +10,7 @@ function weight_dependent_update(network::Network, weight_update::AbstractArray)
     return
 end
 
-function softmax_update(network::Network, weight_update::AbstractArray)
+function softbound_update(network::Network, weight_update::AbstractArray)
     # if abs(network.learning_rule.min_weight) == Inf || abs(network.learning_rule.max_weight) == Inf
     #     error("min_weight and max_weight cannot be Inf")
     # end
