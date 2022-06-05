@@ -65,7 +65,7 @@ function raster(monitor::MonitorActivity; batch=1)
 end
 
 function Base.getindex(monitor::MonitorActivity, idx::Union{UnitRange{Int},Vector{Int},Int})
-    typeof(monitor)([getfield(monitor, i)[idx] for i in propertynames(monitor)]...)
+    typeof(monitor)([getfield(monitor, property)[idx] for property in propertynames(monitor)]...)
 end
 
 function PSP(monitor::WeightMonitor; time=:, from=:, to=:)

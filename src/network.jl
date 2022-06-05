@@ -228,3 +228,21 @@ function Base.getindex(network::Network, idx::Union{UnitRange{Int},Vector{Int}})
                 network.groups,
         )
 end
+
+function Base.getindex(network::Network, idx::Union{UnitRange{Int},Vector{Int},Int})
+        typeof(monitor)(
+                [
+                        begin
+                                if getfield(network, property) <: AbstractArray
+                                        getfield(network, property)[idx]
+                                else
+                                        getfield(network, property)
+                                end
+                        end for property in propertynames(network)
+                ]...
+        )
+end
+
+function Base.getindex(network::Network, group::NeuronGroup)
+        return network[group.idx]
+end
