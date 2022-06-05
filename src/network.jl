@@ -27,13 +27,7 @@ Network structs are used to run simulations. It contains all neurons and connect
         refractory::AbstractArray = zeros(Int32, 1, 0)
         e₊::Union{AbstractArray,Nothing} = zeros(Float32, 1, 0)
         e₋::Union{AbstractArray,Nothing} = zeros(Float32, 1, 0)
-        learning::Bool = begin
-                if isnothing(learning_rule)
-                        false
-                else
-                        true
-                end
-        end
+        learning::Bool = isnothing(learning_rule) ? false : true
         groups::Dict{String,NeuronGroup} = Dict{String,NeuronGroup}()
 end
 

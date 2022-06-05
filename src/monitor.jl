@@ -22,18 +22,18 @@ function Monitor(; record_weight=false)
 end
 
 function record!(monitor::Monitor, network::Network)
-    push!(monitor.spikes, network.spikes |> copy |> cpu)
-    push!(monitor.voltage, network.voltage |> copy |> cpu)
+    push!(monitor.spikes, network.spikes |> copy)
+    push!(monitor.voltage, network.voltage |> copy)
     if typeof(network.neurons) <: Izhikevich
-        push!(monitor.recovery, network.recovery |> copy |> cpu)
+        push!(monitor.recovery, network.recovery |> copy)
     end
     return
 end
 
 function record!(monitor::WeightMonitor, network::Network)
-    push!(monitor.spikes, network.spikes |> copy |> cpu)
-    push!(monitor.voltage, network.voltage |> copy |> cpu)
-    push!(monitor.weight, network.weight |> copy |> cpu)
+    push!(monitor.spikes, network.spikes |> copy)
+    push!(monitor.voltage, network.voltage |> copy)
+    push!(monitor.weight, network.weight |> copy)
     return
 end
 
