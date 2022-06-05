@@ -20,7 +20,7 @@ Network structs are used to run simulations. It contains all neurons and connect
         batch_size::Int = 1
         learning_rule::Union{LearningRule,Nothing} = nothing
         weight::AbstractArray = Array{Float64}(undef, (0, 0))
-        adjacency::AbstractArray = Array{Float64}(undef, (0, 0))
+        adjacency::AbstractArray = Array{Bool}(undef, (0, 0))
         spikes::AbstractArray = zeros(Bool, 1, 0)
         voltage::AbstractArray = ones(Float32, 1, 0)
         recovery::AbstractArray = ones(Float32, 1, 0)
@@ -142,13 +142,13 @@ function _update!(
                 .+
                 network.neurons.v_rest
         )
+        # Get current
+        current = network.spikes * network.weight  # + network.bias #TODO
         # External voltage:
         if !isnothing(input_voltage)
                 input_voltage[network.refractory.>0] .= 0.0
                 network.voltage += input_voltage
         end
-        # Get current
-        current = network.spikes * network.weight  # + network.bias #TODO
         # update voltages
         network.voltage += current
         network.voltage[network.refractory.>0] .= network.neurons.v_rest # reset the voltage of the neurons in the refractory period
@@ -162,12 +162,12 @@ function _update!(
         network::Network{Izhikevich},
         input_voltage::Union{AbstractMatrix,Nothing}
 )
+        # Get current
+        current = network.spikes * network.weight
         # External voltage:
         if !isnothing(input_voltage)
-                current = input_voltage
+                current += input_voltage
         end
-        # Get current
-        current += network.spikes * network.weight
         # Update voltages (spiked neurons)
         network.voltage[network.spikes] .= (network.spikes.*network.neurons.c)[network.spikes]  # change the voltage of spiked neurons to c #TODO: optimize for scalar values
         network.recovery[network.spikes] .+= (network.spikes.*network.neurons.d)[network.spikes]  # add d to the recovery parameter of spiked neurons #TODO: optimize for scalar values
@@ -209,32 +209,17 @@ function save(network::Network, filename::AbstractString)
         save_object(filename, network |> cpu)
 end
 
-function Base.getindex(network::Network, idx::Union{UnitRange{Int},Vector{Int}})
-        new_e₊ = new_e₊[:, idx]
-        new_e₋ = new_e₋[:, idx]
-        return Network(
-                network.neurons,
-                network.batch_size,
-                network.learning_rule,
-                network.weight[idx, idx],
-                network.adjacency[idx, idx],
-                network.spikes[:, idx],
-                network.voltage[:, idx],
-                network.recovery[:, idx],
-                network.refractory[:, idx],
-                new_e₊,
-                new_e₋,
-                network.learning,
-                network.groups,
-        )
-end
 
 function Base.getindex(network::Network, idx::Union{UnitRange{Int},Vector{Int},Int})
-        typeof(monitor)(
+        typeof(network)(
                 [
                         begin
-                                if getfield(network, property) <: AbstractArray
-                                        getfield(network, property)[idx]
+                                if typeof(getfield(network, property)) <: AbstractArray
+                                        if length(getfield(network, property)) > 0
+                                                getfield(network, property)[idx]
+                                        else
+                                                getfield(network, property)
+                                        end
                                 else
                                         getfield(network, property)
                                 end
