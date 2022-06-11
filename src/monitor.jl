@@ -21,7 +21,7 @@ function Monitor(; record_weight=false)
     end
 end
 
-function record!(monitor::Monitor, network::Network)
+function record!(monitor::Monitor, network::SpikingNetwork)
     push!(monitor.spikes, network.spikes |> copy)
     push!(monitor.voltage, network.voltage |> copy)
     if typeof(network.neurons) <: Izhikevich
@@ -30,7 +30,7 @@ function record!(monitor::Monitor, network::Network)
     return
 end
 
-function record!(monitor::WeightMonitor, network::Network)
+function record!(monitor::WeightMonitor, network::SpikingNetwork)
     push!(monitor.spikes, network.spikes |> copy)
     push!(monitor.voltage, network.voltage |> copy)
     push!(monitor.weight, network.weight |> copy)

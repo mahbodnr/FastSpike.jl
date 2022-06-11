@@ -1,4 +1,6 @@
-export Network
+export SpikingNetwork, Network
+
+abstract type SpikingNetwork{T} end
 
 """ 
 # Network
@@ -15,7 +17,7 @@ Network structs are used to run simulations. It contains all neurons and connect
 - `refractory::AbstractArray`: Refractory period, only applicable to LIF neurons. Final size= (Batch size, #neurons)
 ...
 """
-@kwdef mutable struct Network{T<:NeuronType}
+@kwdef mutable struct Network{T<:NeuronType} <: SpikingNetwork{T}
         neurons::T
         batch_size::Int = 1
         learning_rule::Union{LearningRule,Nothing} = nothing
@@ -33,9 +35,8 @@ end
 
 Network(neurons) = Network(neurons=neurons)
 
-function add_group!(network::Network, N::Int; name::Union{String,Nothing}=nothing)
+function add_group!(network::SpikingNetwork, N::Int; name::Union{String,Nothing}=nothing)
         Group = NeuronGroup(N, size(network.weight, 1)+1:size(network.weight, 1)+N)
-
         network.weight = pad2D(network.weight, N)
         network.adjacency = pad2D(network.adjacency, N)
         network.e₊ = pad1D(network.e₊, N)
@@ -46,17 +47,16 @@ function add_group!(network::Network, N::Int; name::Union{String,Nothing}=nothin
                 name = "group_$(length(network.groups)+1)"
         end
         network.groups[name] = Group
-
         return Group
 end
 
-function _add_neuron_features!(network::Network{LIF}, N::Int)
+function _add_neuron_features!(network::SpikingNetwork{LIF}, N::Int)
         network.voltage = pad1D(network.voltage, N)
         fill!(network.voltage, network.neurons.v_rest)
         network.refractory = pad1D(network.refractory, N)
 end
 
-function _add_neuron_features!(network::Network{Izhikevich}, N::Int)
+function _add_neuron_features!(network::SpikingNetwork{Izhikevich}, N::Int)
         network.voltage = pad1D(network.voltage, N)
         if typeof(network.neurons.c) <: AbstractArray
                 network.voltage = network.neurons.c[:, 1:size(network.voltage, 2)]
@@ -78,8 +78,8 @@ function connect!(
         network::Network,
         source::NeuronGroup,
         target::NeuronGroup,
-        weight::AbstractArray,
-        adjacency::AbstractArray,
+        weight::AbstractArray;
+        adjacency::AbstractArray=ones(Bool, source.n, target.n)
 )
         network.weight[source.idx, target.idx] = weight
         network.adjacency[source.idx, target.idx] = adjacency
@@ -90,18 +90,9 @@ function connect!(
         network::Network,
         source::NeuronGroup,
         target::NeuronGroup,
-        weight::AbstractArray,
-)
-        return connect!(network, source, target, weight, ones(Bool, source.n, target.n))
-end
-
-function connect!(
-        network::Network,
-        source::NeuronGroup,
-        target::NeuronGroup,
         connection::Connection,
 )
-        connect!(network, source, target, connection.weight, connection.adjacency)
+        connect!(network, source, target, connection.weight; adjacency=connection.adjacency)
 end
 
 function run!(
@@ -177,7 +168,7 @@ function _update!(
 end
 
 
-function reset!(network::Network)
+function reset!(network::SpikingNetwork)
         fill!(network.spikes, 0)
         if typeof(network.neurons) <: Izhikevich
                 network.voltage .= network.neurons.c
@@ -191,7 +182,7 @@ function reset!(network::Network)
         return
 end
 
-function makeInput(network::Network, time::Integer, inputs::Dict{NeuronGroup}, type=Float64)
+function makeInput(network::SpikingNetwork, time::Integer, inputs::Dict{NeuronGroup}, type=Float64)
         input = zeros(type, time, size(network.weight)[1])
         for group_input in inputs
                 input[:, group_input[1].idx] .= group_input[2]
@@ -199,12 +190,12 @@ function makeInput(network::Network, time::Integer, inputs::Dict{NeuronGroup}, t
         return input
 end
 
-function save(network::Network, filename::AbstractString)
+function save(network::SpikingNetwork, filename::AbstractString)
         save_object(filename, network |> cpu)
 end
 
 
-function Base.getindex(network::Network, idx::Union{UnitRange{Int},Vector{Int},Int})
+function Base.getindex(network::SpikingNetwork, idx::Union{UnitRange{Int},Vector{Int},Int})
         typeof(network)(
                 [
                         begin
@@ -222,6 +213,6 @@ function Base.getindex(network::Network, idx::Union{UnitRange{Int},Vector{Int},I
         )
 end
 
-function Base.getindex(network::Network, group::NeuronGroup)
+function Base.getindex(network::SpikingNetwork, group::NeuronGroup)
         return network[group.idx]
 end

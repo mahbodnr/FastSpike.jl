@@ -1,4 +1,4 @@
-function train!(network::Union{Network,DelayNetwork})
+function train!(network::SpikingNetwork)
     if network.learning_rule.τ₊ == network.learning_rule.τ₋ && network.learning_rule.A₊ == network.learning_rule.A₋
         SymmetricalSTDP!(network)
     else
@@ -24,7 +24,7 @@ end
 
 
 
-function SymmetricalSTDP!(network::Union{Network,DelayNetwork})
+function SymmetricalSTDP!(network::SpikingNetwork)
     network.e₊ *= exp(-network.neurons.dt / network.learning_rule.τ₊)
     if network.learning_rule.traces_additive
         network.e₊ += network.learning_rule.A₊ * network.spikes
@@ -35,7 +35,7 @@ function SymmetricalSTDP!(network::Union{Network,DelayNetwork})
     return
 end
 
-function AsymmetricalSTDP!(network::Union{Network,DelayNetwork})
+function AsymmetricalSTDP!(network::SpikingNetwork)
     network.e₊ *= exp(-network.neurons.dt / network.learning_rule.τ₊)
     network.e₋ *= exp(-network.neurons.dt / network.learning_rule.τ₋)
     if network.learning_rule.traces_additive
