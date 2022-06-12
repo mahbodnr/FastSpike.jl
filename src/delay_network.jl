@@ -144,6 +144,7 @@ function _update!(
         network.spikes .* network.weight .* network._delay,
         dims=1
     )[1, :, :]
+    current += transpose(network.delayed_voltages[:, 1])
     # update voltages
     network.voltage += current
     network.voltage[network.refractory.>0] .= network.neurons.v_rest # reset the voltage of the neurons in the refractory period
@@ -169,7 +170,7 @@ function _update!(
         transpose(network.spikes) .* network.weight .* network._delay,
         dims=1
     )[1, :, :]
-    current = transpose(network.delayed_voltages[:, 1])
+    current += transpose(network.delayed_voltages[:, 1])
     # Update voltages (spiked neurons)
     network.voltage[network.spikes] .= (network.spikes.*network.neurons.c)[network.spikes]  # change the voltage of spiked neurons to c #TODO: optimize for scalar values
     network.recovery[network.spikes] .+= (network.spikes.*network.neurons.d)[network.spikes]  # add d to the recovery parameter of spiked neurons #TODO: optimize for scalar values
