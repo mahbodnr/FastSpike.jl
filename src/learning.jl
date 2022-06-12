@@ -31,7 +31,7 @@ function SymmetricalSTDP!(network::SpikingNetwork)
     else
         network.learning_rule.e₊[network.spikes] .= network.learning_rule.A₊
     end
-    network.e₋ = network.learning_rule.e₊
+    network.learning_rule.e₋ = network.learning_rule.e₊
     return
 end
 

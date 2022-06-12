@@ -11,7 +11,7 @@ end
 `trace_aditive::Bool`: if true performs a "all-to-all interaction" and else performs a "nearest-neighbor interaction".
 See: http://www.scholarpedia.org/article/Spike-timing_dependent_plasticity
 """
-@kwdef struct STDP <: LearningRule
+@kwdef mutable struct STDP <: LearningRule
     A₊::Real
     A₋::Real
     τ₊::Real
@@ -25,7 +25,7 @@ See: http://www.scholarpedia.org/article/Spike-timing_dependent_plasticity
 end
 
 function add_group!(learning_rule::STDP, N::Int, batch_size::Int)
-    if isnothing(e₊)
+    if isnothing(learning_rule.e₊)
         learning_rule.e₊ = zeros(Int32, batch_size, 0)
         learning_rule.e₋ = zeros(Int32, batch_size, 0)
     end
