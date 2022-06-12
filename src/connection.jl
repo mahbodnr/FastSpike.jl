@@ -4,7 +4,7 @@ struct Connection
 end
 
 function randomConnection(n_source::Int, n_target::Int, p::AbstractFloat;
-    min_weight = 0, max_weight = 1, amplitude = nothing, seed = nothing)
+    min_weight=0, max_weight=1, amplitude=nothing, seed=nothing)
     if !isnothing(seed)
         Random.seed!(seed)
     end
@@ -18,16 +18,16 @@ function randomConnection(n_source::Int, n_target::Int, p::AbstractFloat;
     return Connection(weights, adjacency)
 end
 
-function randomConnection(n::Int, p::AbstractFloat; min_weight = 0, max_weight = 1,
-    amplitude = nothing, seed = nothing)
+function randomConnection(n::Int, p::AbstractFloat; min_weight=0, max_weight=1,
+    amplitude=nothing, seed=nothing)
     randomConnection(n, n, p; min_weight, max_weight, amplitude, seed)
 end
 
 
 
 function EI(Nₑ::Integer, Nᵢ::Integer;
-    E_E::Tuple = (0, 1), E_I::Tuple = (0, 1), I_E::Tuple = (0, 1), I_I::Tuple = (0, 1),
-    adjacency::Union{Nothing,AbstractMatrix} = nothing, shuffle::Bool = false, seed = nothing
+    E_E::Tuple=(0, 1), E_I::Tuple=(0, 1), I_E::Tuple=(0, 1), I_I::Tuple=(0, 1),
+    adjacency::Union{Nothing,AbstractMatrix}=nothing, shuffle::Bool=false, seed=nothing
 )
     excitatory = [ones(Bool, Nₑ); zeros(Bool, Nᵢ)]
     if shuffle
@@ -58,8 +58,8 @@ end
 
 
 function EI(n::Integer, EI_rate::AbstractFloat;
-    E_E::Tuple = (0, 1), E_I::Tuple = (0, 1), I_E::Tuple = (0, 1), I_I::Tuple = (0, 1),
-    adjacency::Union{Nothing,AbstractMatrix} = nothing, shuffle::Bool = false, seed = nothing
+    E_E::Tuple=(0, 1), E_I::Tuple=(0, 1), I_E::Tuple=(0, 1), I_I::Tuple=(0, 1),
+    adjacency::Union{Nothing,AbstractMatrix}=nothing, shuffle::Bool=false, seed=nothing
 )
     if EI_rate > 1
         Nₑ = Int(ceil(EI_rate * n / (EI_rate + 1)))

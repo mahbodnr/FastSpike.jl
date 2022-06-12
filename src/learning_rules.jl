@@ -20,5 +20,20 @@ See: http://www.scholarpedia.org/article/Spike-timing_dependent_plasticity
     max_weight::Union{Real,AbstractMatrix} = Inf
     traces_additive::Bool = false
     update_rule::Function = regular_update
+    e₊::Union{AbstractArray,Nothing} = nothing
+    e₋::Union{AbstractArray,Nothing} = nothing
 end
 
+function add_group!(learning_rule::STDP, N::Int, batch_size::Int)
+    if isnothing(e₊)
+        learning_rule.e₊ = zeros(Int32, batch_size, 0)
+        learning_rule.e₋ = zeros(Int32, batch_size, 0)
+    end
+    learning_rule.e₊ = pad1D(learning_rule.e₊, N)
+    learning_rule.e₋ = pad1D(learning_rule.e₋, N)
+end
+
+function reset!(learning_rule::STDP)
+    fill!(learning_rule.e₊, 0)
+    fill!(learning_rule.e₋, 0)
+end

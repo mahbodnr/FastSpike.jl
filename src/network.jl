@@ -23,12 +23,10 @@ Network structs are used to run simulations. It contains all neurons and connect
         learning_rule::Union{LearningRule,Nothing} = nothing
         weight::AbstractArray = Array{Float64}(undef, (0, 0))
         adjacency::AbstractArray = Array{Bool}(undef, (0, 0))
-        spikes::AbstractArray = zeros(Bool, 1, 0)
-        voltage::AbstractArray = ones(Float32, 1, 0)
-        recovery::AbstractArray = ones(Float32, 1, 0)
-        refractory::AbstractArray = zeros(Int32, 1, 0)
-        e₊::Union{AbstractArray,Nothing} = zeros(Float32, 1, 0)
-        e₋::Union{AbstractArray,Nothing} = zeros(Float32, 1, 0)
+        spikes::AbstractArray = zeros(Bool, batch_size, 0)
+        voltage::AbstractArray = ones(Float32, batch_size, 0)
+        recovery::AbstractArray = ones(Float32, batch_size, 0)
+        refractory::AbstractArray = zeros(Int32, batch_size, 0)
         learning::Bool = isnothing(learning_rule) ? false : true
         groups::Dict{String,NeuronGroup} = Dict{String,NeuronGroup}()
 end
@@ -39,9 +37,10 @@ function add_group!(network::SpikingNetwork, N::Int; name::Union{String,Nothing}
         Group = NeuronGroup(N, size(network.weight, 1)+1:size(network.weight, 1)+N)
         network.weight = pad2D(network.weight, N)
         network.adjacency = pad2D(network.adjacency, N)
-        network.e₊ = pad1D(network.e₊, N)
-        network.e₋ = pad1D(network.e₋, N)
         network.spikes = pad1D(network.spikes, N)
+        if !isnothing(network.learning_rule)
+                add_group!(network.learning_rule, N, network.batch_size)
+        end
         _add_neuron_features!(network, N)
         if isnothing(name)
                 name = "group_$(length(network.groups)+1)"
@@ -115,7 +114,6 @@ function run!(
         return network.spikes, network.voltage
 end
 
-
 function _update!(
         network::Network{LIF},
         input_voltage::Union{AbstractMatrix,Nothing}
@@ -168,18 +166,24 @@ function _update!(
 end
 
 
-function reset!(network::SpikingNetwork)
+function _reset!(network::SpikingNetwork)
         fill!(network.spikes, 0)
-        if typeof(network.neurons) <: Izhikevich
-                network.voltage .= network.neurons.c
-                network.recovery = network.neurons.b .* network.voltage
-        else
-                fill!(network.voltage, network.neurons.v_rest)
+        if !isnothing(network.learning_rule)
+                reset!(network.learning_rule)
         end
-        fill!(network.refractory, 0)
-        fill!(network.e₊, 0)
-        fill!(network.e₋, 0)
         return
+end
+
+function reset!(network::SpikingNetwork{LIF})
+        fill!(network.voltage, network.neurons.v_rest)
+        fill!(network.refractory, 0)
+        _reset!(network)
+end
+
+function reset!(network::SpikingNetwork{Izhikevich})
+        network.voltage .= network.neurons.c
+        network.recovery = network.neurons.b .* network.voltage
+        _reset!(network)
 end
 
 function makeInput(network::SpikingNetwork, time::Integer, inputs::Dict{NeuronGroup}, type=Float64)

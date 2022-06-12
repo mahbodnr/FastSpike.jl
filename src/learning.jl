@@ -6,9 +6,9 @@ function train!(network::SpikingNetwork)
     end
 
     s₊ = reshape(network.spikes, network.batch_size, 1, :)
-    e₊ = reshape(network.e₊, network.batch_size, :, 1)
+    e₊ = reshape(network.learning_rule.e₊, network.batch_size, :, 1)
     s₋ = reshape(network.spikes, network.batch_size, :, 1)
-    e₋ = reshape(network.e₋, network.batch_size, 1, :)
+    e₋ = reshape(network.learning_rule.e₋, network.batch_size, 1, :)
 
     weight_update = fill!(similar(network.weight), 0)
     # Pre-Post activities
@@ -25,25 +25,25 @@ end
 
 
 function SymmetricalSTDP!(network::SpikingNetwork)
-    network.e₊ *= exp(-network.neurons.dt / network.learning_rule.τ₊)
+    network.learning_rule.e₊ .*= exp(-network.neurons.dt / network.learning_rule.τ₊)
     if network.learning_rule.traces_additive
-        network.e₊ += network.learning_rule.A₊ * network.spikes
+        network.learning_rule.e₊ += network.learning_rule.A₊ * network.spikes
     else
-        network.e₊[network.spikes] .= network.learning_rule.A₊
+        network.learning_rule.e₊[network.spikes] .= network.learning_rule.A₊
     end
-    network.e₋ = network.e₊
+    network.e₋ = network.learning_rule.e₊
     return
 end
 
 function AsymmetricalSTDP!(network::SpikingNetwork)
-    network.e₊ *= exp(-network.neurons.dt / network.learning_rule.τ₊)
-    network.e₋ *= exp(-network.neurons.dt / network.learning_rule.τ₋)
+    network.learning_rule.e₊ .*= exp(-network.neurons.dt / network.learning_rule.τ₊)
+    network.learning_rule.e₋ .*= exp(-network.neurons.dt / network.learning_rule.τ₋)
     if network.learning_rule.traces_additive
-        network.e₊ += network.learning_rule.A₊ * network.spikes
-        network.e₋ += network.learning_rule.A₋ * network.spikes
+        network.learning_rule.e₊ += network.learning_rule.A₊ * network.spikes
+        network.learning_rule.e₋ += network.learning_rule.A₋ * network.spikes
     else
-        network.e₊[network.spikes] .= network.learning_rule.A₊
-        network.e₋[network.spikes] .= network.learning_rule.A₋
+        network.learning_rule.e₊[network.spikes] .= network.learning_rule.A₊
+        network.learning_rule.e₋[network.spikes] .= network.learning_rule.A₋
     end
     return
 end

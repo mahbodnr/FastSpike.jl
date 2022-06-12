@@ -25,12 +25,10 @@ Network with axonal conduction delays.
     learning_rule::Union{LearningRule,Nothing} = nothing
     weight::AbstractArray = Array{Float64}(undef, (0, 0))
     adjacency::AbstractArray = Array{Bool}(undef, (0, 0))
-    spikes::AbstractArray = zeros(Bool, 1, 0)
-    voltage::AbstractArray = ones(Float32, 1, 0)
-    recovery::AbstractArray = ones(Float32, 1, 0)
-    refractory::AbstractArray = zeros(Int32, 1, 0)
-    e₊::Union{AbstractArray,Nothing} = zeros(Float32, 1, 0)
-    e₋::Union{AbstractArray,Nothing} = zeros(Float32, 1, 0)
+    spikes::AbstractArray = zeros(Bool, batch_size, 0)
+    voltage::AbstractArray = ones(Float32, batch_size, 0)
+    recovery::AbstractArray = ones(Float32, batch_size, 0)
+    refractory::AbstractArray = zeros(Int32, batch_size, 0)
     learning::Bool = isnothing(learning_rule) ? false : true
     groups::Dict{String,NeuronGroup} = Dict{String,NeuronGroup}()
     delay::AbstractArray = Array{Float64}(undef, (0, 0))
@@ -47,9 +45,10 @@ function add_group!(network::DelayNetwork, N::Int; name::Union{String,Nothing}=n
     Group = NeuronGroup(N, size(network.weight, 1)+1:size(network.weight, 1)+N)
     network.weight = pad2D(network.weight, N)
     network.adjacency = pad2D(network.adjacency, N)
-    network.e₊ = pad1D(network.e₊, N)
-    network.e₋ = pad1D(network.e₋, N)
     network.spikes = pad1D(network.spikes, N)
+    if !isnothing(network.learning_rule)
+        add_group!(network.learning_rule, N, network.batch_size)
+    end
     _add_neuron_features!(network, N)
     if isnothing(name)
         name = "group_$(length(network.groups)+1)"
@@ -100,6 +99,9 @@ function run!(
     input_spikes::Union{AbstractMatrix{Bool},Nothing}=nothing,
     input_voltage::Union{AbstractMatrix,Nothing}=nothing
 )
+    if network.batch_size > 1 #TODO: implement batch_size>1 for DelayNetwork
+        error("`batch_size > 1` is not supported for DelayNetwork yet!")
+    end
     # Evoke spikes
     network.spikes = network.voltage .>= network.neurons.v_thresh
     # External spikes
