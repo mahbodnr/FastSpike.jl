@@ -9,7 +9,7 @@ Spike Timing Dependent Plasticity learning rule. See: http://www.scholarpedia.or
 ...
 - `trace_aditive::Bool`: if true performs a "all-to-all interaction" and else performs a "nearest-neighbor interaction".
 """
-@kwdef mutable struct STDP <: LearningRule
+@with_kw mutable struct STDP <: LearningRule
     A₊::Real
     A₋::Real
     τ₊::Real

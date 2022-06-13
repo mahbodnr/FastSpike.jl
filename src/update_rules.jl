@@ -52,3 +52,6 @@ end
 function set_reward(update_rule::RewardModulatedUpdateRule, new_reward::Float64)
     update_rule.reward = new_reward
 end
+function set_reward(network::SpikingNetwork, new_reward::Float64)
+    network.learning_rule.update_rule.reward = new_reward
+end

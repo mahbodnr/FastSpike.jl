@@ -2,16 +2,18 @@ export NeuronType, LIF, Izhikevich, NeuronGroup
 
 abstract type NeuronType end
 
-@kwdef struct LIF <: NeuronType
+@with_kw struct LIF <: NeuronType
     dt::Real = 1
     v_thresh::Real = -52.0
     v_rest::Real = -65.0
     v_reset::Real = -65.0
     refractory_period::Int = 5
-    voltage_decay_factor::Real = exp(-dt / 100)
+    voltage_time_constant::Real = 100
+    voltage_decay_factor::Real = exp(-dt / voltage_time_constant)
+    @assert voltage_decay_factor == exp(-dt / voltage_time_constant)
 end
 
-@kwdef struct Izhikevich <: NeuronType
+@with_kw struct Izhikevich <: NeuronType
     dt::Real = 1
     a::Union{Real,AbstractMatrix} = 0.02
     b::Union{Real,AbstractMatrix} = 0.2

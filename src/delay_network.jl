@@ -19,7 +19,7 @@ Network with axonal conduction delays.
 - `delayed_voltages::AbstractArray`: Keeps track of upcomig voltages
 ...
 """
-@kwdef mutable struct DelayNetwork{T<:NeuronType} <: SpikingNetwork{T}
+@with_kw mutable struct DelayNetwork{T<:NeuronType} <: SpikingNetwork{T}
     neurons::T
     batch_size::Int = 1
     learning_rule::Union{LearningRule,Nothing} = nothing

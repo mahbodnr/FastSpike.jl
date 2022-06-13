@@ -15,7 +15,7 @@ Network structs are used to run simulations. It contains all neurons and connect
 - `refractory::AbstractArray`: Refractory period, only applicable to LIF neurons. Final size= (Batch size, #neurons)
 ...
 """
-@kwdef mutable struct Network{T<:NeuronType} <: SpikingNetwork{T}
+@with_kw mutable struct Network{T<:NeuronType} <: SpikingNetwork{T}
         neurons::T
         batch_size::Int = 1
         learning_rule::Union{LearningRule,Nothing} = nothing

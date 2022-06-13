@@ -1,6 +1,5 @@
 module FastSpike
 
-import Base.@kwdef
 using LinearAlgebra
 using Random
 using RecursiveArrayTools
@@ -9,6 +8,7 @@ using NNlib
 using CUDA
 using Adapt
 using OMEinsum
+using Parameters: @with_kw
 
 export add_group!, connect!, run!, train!, reset!, pad1D, pad2D, record!, get, save, load,
         gpu, cpu, randomConnection, regularActivity, randomActivity, makeInput, EI,
