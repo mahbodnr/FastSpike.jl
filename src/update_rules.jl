@@ -1,5 +1,6 @@
 export UpdateRule, RewardModulatedUpdateRule
 export RegularUpdate, WeightDependentUpdate, SoftboundUpdate, RewardModulatedUpdate, WeightDependentRewardModulatedUpdate
+export set_reward
 
 abstract type UpdateRule end
 
