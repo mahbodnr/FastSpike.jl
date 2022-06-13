@@ -12,17 +12,21 @@ using OMEinsum
 
 export add_group!, connect!, run!, train!, reset!, pad1D, pad2D, record!, get, save, load,
         gpu, cpu, randomConnection, regularActivity, randomActivity, makeInput, EI,
-        raster, regular_update, weight_dependent_update, softbound_update
-export Network, DelayNetwork, LearningRule, NeuronType, NeuronGroup, LIF, Izhikevich,
-        STDP, Monitor, Connection
+        raster
+export SpikingNetwork, Network, DelayNetwork, LearningRule, NeuronType, NeuronGroup, LIF,
+        Izhikevich, STDP, Monitor, Connection, UpdateRule, RewardModulatedUpdateRule,
+        RegularUpdate, WeightDependentUpdate, SoftboundUpdate, RewardModulatedUpdate,
+        WeightDependentRewardModulatedUpdate
+
+abstract type SpikingNetwork{T} end
 
 include("utils.jl")
 include("connection.jl")
 include("neuron.jl")
+include("update_rules.jl")
 include("learning_rules.jl")
 include("network.jl")
 include("delay_network.jl")
-include("update_rules.jl")
 include("monitor.jl")
 include("learning.jl")
 include("cuda.jl")

@@ -14,7 +14,7 @@ batch_size = 5
         neurons=LIF(),
         learning_rule=STDP(A₊=1, A₋=1, τ₊=20, τ₋=20,
             min_weight=min_weight, max_weight=max_weight,
-            update_rule=weight_dependent_update
+            update_rule=SoftboundUpdate()
         ),
         batch_size=batch_size,
     )

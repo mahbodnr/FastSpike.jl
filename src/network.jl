@@ -1,6 +1,4 @@
-export SpikingNetwork, Network
-
-abstract type SpikingNetwork{T} end
+export Network
 
 """ 
 # Network

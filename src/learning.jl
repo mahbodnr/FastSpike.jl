@@ -23,7 +23,6 @@ function train!(network::SpikingNetwork)
 end
 
 
-
 function SymmetricalSTDP!(network::SpikingNetwork)
     network.learning_rule.e₊ .*= exp(-network.neurons.dt / network.learning_rule.τ₊)
     if network.learning_rule.traces_additive

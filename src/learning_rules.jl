@@ -2,14 +2,12 @@ export STDP
 
 abstract type LearningRule end
 
-function regular_update(network, weight_update)
-    network.weight += weight_update .* network.adjacency
-    return
-end
-
 """
-`trace_aditive::Bool`: if true performs a "all-to-all interaction" and else performs a "nearest-neighbor interaction".
-See: http://www.scholarpedia.org/article/Spike-timing_dependent_plasticity
+# STDP learning rule
+Spike Timing Dependent Plasticity learning rule. See: http://www.scholarpedia.org/article/Spike-timing_dependent_plasticity
+# Arguments
+...
+- `trace_aditive::Bool`: if true performs a "all-to-all interaction" and else performs a "nearest-neighbor interaction".
 """
 @kwdef mutable struct STDP <: LearningRule
     A₊::Real
@@ -19,10 +17,11 @@ See: http://www.scholarpedia.org/article/Spike-timing_dependent_plasticity
     min_weight::Union{Real,AbstractMatrix} = -Inf
     max_weight::Union{Real,AbstractMatrix} = Inf
     traces_additive::Bool = false
-    update_rule::Function = regular_update
+    update_rule::UpdateRule = RegularUpdate()
     e₊::Union{AbstractArray,Nothing} = nothing
     e₋::Union{AbstractArray,Nothing} = nothing
 end
+
 
 function add_group!(learning_rule::STDP, N::Int, batch_size::Int)
     if isnothing(learning_rule.e₊)
