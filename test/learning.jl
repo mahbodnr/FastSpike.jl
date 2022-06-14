@@ -14,18 +14,18 @@ batch_size = 5
         neurons=LIF(),
         learning_rule=STDP(A₊=1, A₋=1, τ₊=20, τ₋=20,
             min_weight=min_weight, max_weight=max_weight,
-            update_rule=SoftboundUpdate()
+            update_rule=WeightDependentRewardModulated(0)
         ),
         batch_size=batch_size,
     )
     neurons = add_group!(net, N; name="neurons")
     connect!(net, neurons, neurons, connection)
+    set_reward(net, 1)
     run!(
         net;
         input_voltage=ones((batch_size, N)),
         input_spikes=ones(Bool, (batch_size, N))
     )
-
     @test true
 end
 

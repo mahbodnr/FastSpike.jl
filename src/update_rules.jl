@@ -1,5 +1,5 @@
 export UpdateRule, RewardModulatedUpdateRule
-export RegularUpdate, WeightDependentUpdate, SoftboundUpdate, RewardModulatedUpdate, WeightDependentRewardModulatedUpdate
+export RegularUpdate, WeightDependent, Softbound, RewardModulatedUpdate, WeightDependentRewardModulated
 export set_reward
 
 abstract type UpdateRule end
@@ -9,13 +9,13 @@ function (update_rule::RegularUpdate)(network::SpikingNetwork, weight_update::Ab
     network.weight += weight_update .* network.adjacency
 end
 
-struct WeightDependentUpdate <: UpdateRule end
-function (update_rule::WeightDependentUpdate)(network::SpikingNetwork, weight_update::AbstractArray)
+struct WeightDependent <: UpdateRule end
+function (update_rule::WeightDependent)(network::SpikingNetwork, weight_update::AbstractArray)
     network.weight += weight_update .* network.adjacency .* network.weight
 end
 
-struct SoftboundUpdate <: UpdateRule end
-function (update_rule::SoftboundUpdate)(network::SpikingNetwork, weight_update::AbstractArray)
+struct Softbound <: UpdateRule end
+function (update_rule::Softbound)(network::SpikingNetwork, weight_update::AbstractArray)
     # if abs(network.learning_rule.min_weight) == Inf || abs(network.learning_rule.max_weight) == Inf
     #     error("min_weight and max_weight cannot be Inf")
     # end
@@ -35,23 +35,23 @@ Based on: Izhikevich, E.M. Solving the distal reward problem through linkage of 
 ...
 - `trace_aditive::Bool`: if true performs a "all-to-all interaction" and else performs a "nearest-neighbor interaction".
 """
-mutable struct RewardModulatedUpdate <: RewardModulatedUpdateRule
+mutable struct RewardModulated <: RewardModulatedUpdateRule
     reward::Float64
 end
-function (update_rule::RewardModulatedUpdate)(network::SpikingNetwork, weight_update::AbstractArray)
+function (update_rule::RewardModulated)(network::SpikingNetwork, weight_update::AbstractArray)
     network.weight += weight_update .* network.adjacency .* update_rule.reward
 end
 
-struct WeightDependentRewardModulatedUpdate <: RewardModulatedUpdateRule
+mutable struct WeightDependentRewardModulated <: RewardModulatedUpdateRule
     reward::Float64
 end
-function (update_rule::WeightDependentRewardModulatedUpdate)(network::SpikingNetwork, weight_update::AbstractArray)
+function (update_rule::WeightDependentRewardModulated)(network::SpikingNetwork, weight_update::AbstractArray)
     network.weight += weight_update .* network.adjacency * update_rule.reward .* network.weight
 end
 
-function set_reward(update_rule::RewardModulatedUpdateRule, new_reward::Float64)
+function set_reward(update_rule::RewardModulatedUpdateRule, new_reward::Real)
     update_rule.reward = new_reward
 end
-function set_reward(network::SpikingNetwork, new_reward::Float64)
+function set_reward(network::SpikingNetwork, new_reward::Real)
     network.learning_rule.update_rule.reward = new_reward
 end
