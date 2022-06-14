@@ -1,6 +1,7 @@
 export UpdateRule, RewardModulatedUpdateRule
 export RegularUpdate, WeightDependent, Softbound, RewardModulatedUpdate, WeightDependentRewardModulated
 export set_reward
+export WeightDependentUpdate # TODO: remove later 
 
 abstract type UpdateRule end
 
@@ -10,6 +11,12 @@ function (update_rule::RegularUpdate)(network::SpikingNetwork, weight_update::Ab
 end
 
 struct WeightDependent <: UpdateRule end
+function (update_rule::WeightDependent)(network::SpikingNetwork, weight_update::AbstractArray)
+    network.weight += weight_update .* network.adjacency .* network.weight
+end
+
+# Old version name:
+struct WeightDependentUpdate <: UpdateRule end
 function (update_rule::WeightDependent)(network::SpikingNetwork, weight_update::AbstractArray)
     network.weight += weight_update .* network.adjacency .* network.weight
 end
