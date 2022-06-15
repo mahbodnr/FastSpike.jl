@@ -41,20 +41,7 @@ DelayNetwork(neurons) = DelayNetwork(neurons=neurons)
 
 function add_group!(network::DelayNetwork, N::Int; name::Union{String,Nothing}=nothing)
     network.delay = pad2D(network.delay, N)
-
-    Group = NeuronGroup(N, size(network.weight, 1)+1:size(network.weight, 1)+N)
-    network.weight = pad2D(network.weight, N)
-    network.adjacency = pad2D(network.adjacency, N)
-    network.spikes = pad1D(network.spikes, N)
-    if !isnothing(network.learning_rule)
-        add_group!(network.learning_rule, N, network.batch_size)
-    end
-    _add_neuron_features!(network, N)
-    if isnothing(name)
-        name = "group_$(length(network.groups)+1)"
-    end
-    network.groups[name] = Group
-    return Group
+    invoke(add_group!, Tuple{SpikingNetwork,Int}, network, N; name=name)
 end
 
 
@@ -77,9 +64,11 @@ function connect!(
         end
     end
     network.delayed_voltages = zeros(size(network.delay)[1], Int(maximum(network.delay) + 1))
-
-    network.weight[source.idx, target.idx] = weight
-    network.adjacency[source.idx, target.idx] = adjacency
+    invoke(
+        connect!,
+        Tuple{SpikingNetwork,NeuronGroup,NeuronGroup,AbstractArray},
+        network, source, target, weight, ; adjacency=adjacency
+    )
     return
 end
 

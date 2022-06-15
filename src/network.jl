@@ -72,7 +72,7 @@ end
 Add a connection between two neuron groups in the network
 """
 function connect!(
-        network::Network,
+        network::SpikingNetwork,
         source::NeuronGroup,
         target::NeuronGroup,
         weight::AbstractArray;
@@ -84,7 +84,7 @@ function connect!(
 end
 
 function connect!(
-        network::Network,
+        network::SpikingNetwork,
         source::NeuronGroup,
         target::NeuronGroup,
         connection::Connection,

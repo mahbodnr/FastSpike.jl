@@ -17,7 +17,7 @@ end
 
 # Old version name:
 struct WeightDependentUpdate <: UpdateRule end
-function (update_rule::WeightDependent)(network::SpikingNetwork, weight_update::AbstractArray)
+function (update_rule::WeightDependentUpdate)(network::SpikingNetwork, weight_update::AbstractArray)
     network.weight += weight_update .* network.adjacency .* network.weight
 end
 

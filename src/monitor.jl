@@ -51,8 +51,15 @@ function reset!(monitor::WeightMonitor)
     return
 end
 
+"""
+Returns a specific field from monitor. The output shape is: (batch_size, #neurons, time)
+# Examples
+```julia-repl
+julia> get(network, :spikes)
+```
+"""
 function Base.get(monitor::MonitorActivity, field::Symbol)
-    return convert(Array, VectorOfArray(getfield(monitor, field))) # size: batch_size, #neurons, time
+    return convert(Array, VectorOfArray(getfield(monitor, field)))
 end
 
 function save(monitor::MonitorActivity, filename::AbstractString)
