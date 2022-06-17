@@ -4,8 +4,6 @@ mutable struct Monitor <: MonitorActivity
     spikes::AbstractArray
     voltage::AbstractArray
     recovery::AbstractArray
-    # e₊::AbstractArray
-    # e₋::AbstractArray
 end
 mutable struct WeightMonitor <: MonitorActivity
     spikes::AbstractArray

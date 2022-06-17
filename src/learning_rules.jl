@@ -25,8 +25,8 @@ end
 
 function add_group!(learning_rule::STDP, N::Int, batch_size::Int)
     if isnothing(learning_rule.e₊)
-        learning_rule.e₊ = zeros(Int32, batch_size, 0)
-        learning_rule.e₋ = zeros(Int32, batch_size, 0)
+        learning_rule.e₊ = zeros(Float32, batch_size, 0)
+        learning_rule.e₋ = zeros(Float32, batch_size, 0)
     end
     learning_rule.e₊ = pad1D(learning_rule.e₊, N)
     learning_rule.e₋ = pad1D(learning_rule.e₋, N)
