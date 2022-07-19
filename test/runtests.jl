@@ -3,7 +3,7 @@ using SafeTestsets
 @safetestset "Networks Types" begin
     include("networks.jl")
 end
-@safetestset "Neuron Types" begin
+@safetestset "Learning Rules" begin
     include("learning.jl")
 end
 #TODO:
