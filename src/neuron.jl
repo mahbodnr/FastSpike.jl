@@ -122,7 +122,6 @@ function add_group!(neurons::Izhikevich, N::Int, batch_size::Int) end
     v_thresh::Union{AbstractMatrix,Nothing} = nothing
     z::Union{AbstractMatrix,Nothing} = nothing
     wₐ::Union{AbstractMatrix,Nothing} = nothing
-    @assert all([v_thresh, z, wₐ] .== nothing)
 end
 
 function add_group!(neurons::AdEx, N::Int, batch_size::Int)
