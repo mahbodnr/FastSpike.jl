@@ -28,7 +28,7 @@ Network structs are used to run simulations. It contains all neurons and connect
         learning::Bool = isnothing(learning_rule) ? false : true
         groups::Dict{String,NeuronGroup} = Dict{String,NeuronGroup}()
 end
-
+#TODO: add recovery and refractory to LIF and Izhikevich neurons
 Network(neurons) = Network(neurons=neurons)
 
 function add_group!(network::SpikingNetwork, N::Int; name::Union{String,Nothing}=nothing)
@@ -36,6 +36,7 @@ function add_group!(network::SpikingNetwork, N::Int; name::Union{String,Nothing}
         network.weight = pad2D(network.weight, N)
         network.adjacency = pad2D(network.adjacency, N)
         network.spikes = pad1D(network.spikes, N)
+        add_group!(network.neurons, N, network.batch_size)
         if !isnothing(network.learning_rule)
                 add_group!(network.learning_rule, N, network.batch_size)
         end
@@ -47,6 +48,7 @@ function add_group!(network::SpikingNetwork, N::Int; name::Union{String,Nothing}
         return Group
 end
 
+#TODO: move this function to neuron add_group!
 function _add_neuron_features!(network::SpikingNetwork{LIF}, N::Int)
         network.voltage = pad1D(network.voltage, N)
         fill!(network.voltage, network.neurons.v_rest)
@@ -67,6 +69,10 @@ function _add_neuron_features!(network::SpikingNetwork{Izhikevich}, N::Int)
         end
 end
 
+function _add_neuron_features!(network::SpikingNetwork{AdEx}, N::Int)
+        network.voltage = pad1D(network.voltage, N)
+        fill!(network.voltage, network.neurons.v_reset)
+end
 
 """
 Add a connection between two neuron groups in the network
@@ -137,6 +143,36 @@ function _update!(
         # Update refractory timepoints
         network.refractory .-= network.neurons.dt
         network.refractory[network.spikes] .= network.neurons.refractory_period
+end
+
+function _update!(
+        network::Network{AdEx},
+        input_voltage::Union{AbstractMatrix,Nothing}
+)
+        neurons = network.neurons
+        # Get current
+        current = network.spikes * network.weight  # + network.bias #TODO
+        # External voltage:
+        if !isnothing(input_voltage)
+                current += input_voltage
+        end
+        # update voltages
+        network.voltage += neurons.dt / neurons.C .* (
+                neurons.gₗ .* (
+                        -network.voltage .+ neurons.Eₗ + neurons.Δₜ .* exp.((network.voltage - neurons.v_thresh) ./ neurons.Δₜ)
+                ) + 1000 .* current - neurons.wₐ + neurons.z
+        )
+        neurons.wₐ += neurons.dt / neurons.τₐ .* (
+                neurons.a * (network.voltage .- neurons.Eₗ) - neurons.wₐ
+        )
+        neurons.z += neurons.dt / neurons.τz .* (-neurons.z)
+        neurons.v_thresh += -neurons.dt / neurons.τᵥ .* (
+                neurons.v_thresh .- neurons.Vₜ_rest
+        )
+        network.voltage[network.spikes] .= neurons.v_reset  # change the voltage of spiked neurons to v_reset
+        neurons.wₐ[network.spikes] .+= neurons.b
+        neurons.z[network.spikes] .= neurons.Iₛ
+        neurons.v_thresh[network.spikes] .= neurons.Vₜ_max
 end
 
 function _update!(

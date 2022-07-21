@@ -73,4 +73,22 @@ for network in [Network, DelayNetwork]
 
         @test true
     end
+
+    @testset "$network of AdEx neurons" begin
+        connection = randomConnection(N, 0.1)
+        # Define Network
+        net = network(
+            neurons=AdEx(),
+            batch_size=batch_size,
+        )
+        neurons = add_group!(net, N; name="neurons")
+        connect!(net, neurons, neurons, connection)
+        run!(
+            net;
+            input_voltage=ones((batch_size, N)),
+            input_spikes=ones(Bool, (batch_size, N))
+        )
+
+        @test true
+    end
 end
