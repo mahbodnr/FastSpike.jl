@@ -73,3 +73,45 @@ function reset!(learning_rule::vSTDP)
     fill!(learning_rule.ū₋, 0)
     fill!(learning_rule.ū₊, 0)
 end
+
+
+"""
+# Calcium-based STDP
+Calcium-based STDP learning rule. See: https://www.nature.com/articles/nn.2479
+# Arguments
+...
+"""
+@with_kw mutable struct cSTDP <: LearningRule
+    τ_calcium::Real
+    Cₚᵣₑ::Real
+    Cₚₒₛₜ::Real
+    θ₋::Real
+    θ₊::Real
+    γ₋::Real
+    γ₊::Real
+    σ::Real
+    τᵨ::Real
+    ρ_star::Real
+    min_weight::Union{Real,AbstractMatrix} = -Inf
+    max_weight::Union{Real,AbstractMatrix} = Inf
+    initial_weights::Union{AbstractArray,Nothing} = nothing
+    efficacy::Union{AbstractArray,Nothing} = nothing
+    calcium::Union{AbstractArray,Nothing} = nothing
+end
+
+function add_group!(learning_rule::cSTDP, N::Int, batch_size::Int)
+    if batch_size > 1
+        error("Not Implemented! cSTDP learning rule does not support batch_size>1 yet.")
+    end
+    if isnothing(learning_rule.efficacy)
+        learning_rule.efficacy = Array{Float64}(undef, (0, 0))
+        learning_rule.calcium = Array{Float64}(undef, (0, 0))
+    end
+    learning_rule.efficacy = pad2D(learning_rule.efficacy, N)
+    learning_rule.calcium = pad2D(learning_rule.calcium, N)
+end
+
+function reset!(learning_rule::cSTDP)
+    fill!(learning_rule.efficacy, 0)
+    fill!(learning_rule.calcium, 0)
+end

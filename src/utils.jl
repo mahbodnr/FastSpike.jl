@@ -1,3 +1,5 @@
+Θ(x) = x > 0 ? 1 : 0
+
 function load(filename::AbstractString)
         return load_object(filename)
 end
