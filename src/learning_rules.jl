@@ -92,6 +92,7 @@ Calcium-based STDP learning rule. See: https://www.nature.com/articles/nn.2479
     σ::Real
     τᵨ::Real
     ρ_star::Real
+    β::Real
     min_weight::Union{Real,AbstractMatrix} = -Inf
     max_weight::Union{Real,AbstractMatrix} = Inf
     initial_weights::Union{AbstractArray,Nothing} = nothing

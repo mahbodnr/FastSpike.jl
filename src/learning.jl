@@ -1,5 +1,6 @@
 function train!(network::SpikingNetwork)
     return train!(network, network.learning_rule)
+    network.weight = clamp.(network.weight, network.learning_rule.min_weight, network / learning_rule.max_weight)
 end
 
 function train!(network::SpikingNetwork, learning_rule::STDP)
@@ -19,7 +20,6 @@ function train!(network::SpikingNetwork, learning_rule::STDP)
     weight_update -= ein"bix,bxj->ij"(s₋, e₋)
     # Update weights
     learning_rule.update_rule(network, weight_update)
-    network.weight = clamp.(network.weight, learning_rule.min_weight, learning_rule.max_weight)
 end
 
 
@@ -65,28 +65,28 @@ function train!(network::SpikingNetwork, learning_rule::vSTDP)
         # LTP:
         learning_rule.A₊ .*
         ein"bix,bxj->ij"(x̄, (max.(u .- learning_rule.θ₊, 0) .* max.(ū₊ .- learning_rule.θ₋, 0)))
-    )
-
-    network.weight = clamp.(network.weight, learning_rule.min_weight, learning_rule.max_weight)
+    ) .* network.adjacency
 end
 
 function train!(network::SpikingNetwork, learning_rule::cSTDP)
     if isnothing(learning_rule.initial_weights)
         learning_rule.initial_weights = copy(network.weight)
+        learning_rule.efficacy[randsubseq(1:length(learning_rule.efficacy), 1 - learning_rule.β)] .= 1
+        learning_rule.efficacy .*= network.adjacency
     end
     learning_rule.calcium .+= network.neurons.dt / learning_rule.τ_calcium .* (-learning_rule.calcium)
     learning_rule.calcium[network.spikes[1, :], :] .+= learning_rule.Cₚᵣₑ
     learning_rule.calcium[:, network.spikes[1, :]] .+= learning_rule.Cₚₒₛₜ
-    learning_rule.efficacy += network.neurons.dt / learning_rule.τᵨ .* (
+    Gaussian = similar(learning_rule.calcium)
+    CUDA.@allowscalar rand!(Normal(0, 1), Gaussian)
+    learning_rule.efficacy .+= network.neurons.dt / learning_rule.τᵨ .* (
         -learning_rule.efficacy .* (1 .- learning_rule.efficacy) .* (learning_rule.ρ_star .- learning_rule.efficacy)
         +
         learning_rule.γ₊ .* (1 .- learning_rule.efficacy) .* Θ.(learning_rule.calcium .- learning_rule.θ₊)
         -
         learning_rule.γ₋ .* learning_rule.efficacy .* Θ.(learning_rule.calcium .- learning_rule.θ₋)
-        # TODO: make random noise compatible with gpu.
-        # +
-        # learning_rule.σ .* sqrt(learning_rule.τᵨ) .* Θ.(learning_rule.calcium .- min(learning_rule.θ₋, learning_rule.θ₊)) * rand(Normal(0, 1), size(Gaussian)...)
-    )
+        +
+        learning_rule.σ .* sqrt(learning_rule.τᵨ) .* Θ.(learning_rule.calcium .- min(learning_rule.θ₋, learning_rule.θ₊)) * Gaussian
+    ) .* network.adjacency
     network.weight = learning_rule.initial_weights .* learning_rule.efficacy
-    network.weight = clamp.(network.weight, learning_rule.min_weight, learning_rule.max_weight)
 end

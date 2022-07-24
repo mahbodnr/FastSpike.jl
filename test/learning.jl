@@ -63,7 +63,7 @@ end
         neurons=LIF(),
         learning_rule=cSTDP(
             τ_calcium=20, Cₚᵣₑ=1, Cₚₒₛₜ=2, θ₋=1, θ₊=3.5, γ₋=200, γ₊=400, σ=2.8,
-            τᵨ=150, ρ_star=0.5, min_weight=min_weight, max_weight=max_weight,
+            τᵨ=150, ρ_star=0.5, β=0.5, min_weight=min_weight, max_weight=max_weight,
         ),
         batch_size=1,
     )
