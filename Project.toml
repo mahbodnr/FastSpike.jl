@@ -19,6 +19,7 @@ RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd"
 
 [compat]
 CUDA = "3"
+Cairo = "1"
 JLD2 = ">= 0.4.22"
 julia = "1"
 
