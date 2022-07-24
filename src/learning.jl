@@ -77,16 +77,16 @@ function train!(network::SpikingNetwork, learning_rule::cSTDP)
     learning_rule.calcium .+= network.neurons.dt / learning_rule.τ_calcium .* (-learning_rule.calcium)
     learning_rule.calcium[network.spikes[1, :], :] .+= learning_rule.Cₚᵣₑ
     learning_rule.calcium[:, network.spikes[1, :]] .+= learning_rule.Cₚₒₛₜ
-    Gaussian = similar(learning_rule.calcium)
-    CUDA.@allowscalar rand!(Normal(0, 1), Gaussian)
+    # Gaussian = similar(learning_rule.calcium)
+    # CUDA.@allowscalar rand!(Normal(0, 1), Gaussian)
     learning_rule.efficacy .+= network.neurons.dt / learning_rule.τᵨ .* (
         -learning_rule.efficacy .* (1 .- learning_rule.efficacy) .* (learning_rule.ρ_star .- learning_rule.efficacy)
         +
         learning_rule.γ₊ .* (1 .- learning_rule.efficacy) .* Θ.(learning_rule.calcium .- learning_rule.θ₊)
         -
         learning_rule.γ₋ .* learning_rule.efficacy .* Θ.(learning_rule.calcium .- learning_rule.θ₋)
-        +
-        learning_rule.σ .* sqrt(learning_rule.τᵨ) .* Θ.(learning_rule.calcium .- min(learning_rule.θ₋, learning_rule.θ₊)) * Gaussian
+        # +
+        # learning_rule.σ .* sqrt(learning_rule.τᵨ) .* Θ.(learning_rule.calcium .- min(learning_rule.θ₋, learning_rule.θ₊)) * Gaussian
     ) .* network.adjacency
     network.weight = learning_rule.initial_weights .* learning_rule.efficacy
 end
