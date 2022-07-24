@@ -77,7 +77,7 @@ function train!(network::SpikingNetwork, learning_rule::cSTDP)
     learning_rule.calcium .+= network.neurons.dt / learning_rule.τ_calcium .* (-learning_rule.calcium)
     learning_rule.calcium[network.spikes[1, :], :] .+= learning_rule.Cₚᵣₑ
     learning_rule.calcium[:, network.spikes[1, :]] .+= learning_rule.Cₚₒₛₜ
-    learning_rule.efficacy = network.neurons.dt / learning_rule.τᵨ .* (
+    learning_rule.efficacy += network.neurons.dt / learning_rule.τᵨ .* (
         -learning_rule.efficacy .* (1 .- learning_rule.efficacy) .* (learning_rule.ρ_star .- learning_rule.efficacy)
         +
         learning_rule.γ₊ .* (1 .- learning_rule.efficacy) .* Θ.(learning_rule.calcium .- learning_rule.θ₊)
