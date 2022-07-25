@@ -1,6 +1,7 @@
 function train!(network::SpikingNetwork)
-    return train!(network, network.learning_rule)
+    train!(network, network.learning_rule)
     network.weight = clamp.(network.weight, network.learning_rule.min_weight, network / learning_rule.max_weight)
+    return
 end
 
 function train!(network::SpikingNetwork, learning_rule::STDP)
