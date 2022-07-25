@@ -9,6 +9,7 @@ function randomConnection(n_source::Int, n_target::Int, p::AbstractFloat;
         Random.seed!(seed)
     end
     adjacency = rand(n_source, n_target) .< p
+    adjacency[adjacency+2I.>1] .= 0
     if isnothing(amplitude)
         weights = rand(n_source, n_target) .* (max_weight - min_weight) .+ min_weight
     else
