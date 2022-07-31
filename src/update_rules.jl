@@ -15,12 +15,6 @@ function (update_rule::WeightDependent)(network::SpikingNetwork, weight_update::
     network.weight += weight_update .* network.adjacency .* network.weight
 end
 
-# Old version name:
-struct WeightDependentUpdate <: UpdateRule end
-function (update_rule::WeightDependentUpdate)(network::SpikingNetwork, weight_update::AbstractArray)
-    network.weight += weight_update .* network.adjacency .* network.weight
-end
-
 struct Softbound <: UpdateRule end
 function (update_rule::Softbound)(network::SpikingNetwork, weight_update::AbstractArray)
     # if abs(network.learning_rule.min_weight) == Inf || abs(network.learning_rule.max_weight) == Inf

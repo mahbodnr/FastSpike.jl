@@ -15,9 +15,9 @@ export add_group!, connect!, run!, train!, reset!, pad1D, pad2D, record!, get, s
         gpu, cpu, randomConnection, regularActivity, randomActivity, makeInput, EI,
         raster, set_reward
 export SpikingNetwork, Network, DelayNetwork, LearningRule, NeuronType, NeuronGroup, LIF,
-        Izhikevich, AdEx, STDP, vSTDP, cSTDP, Monitor, Connection, UpdateRule, RewardModulatedUpdateRule,
-        RegularUpdate, WeightDependent, WeightDependentUpdate, Softbound, RewardModulated,
-        WeightDependentRewardModulated
+        Izhikevich, AdEx, STDP, STDPET, vSTDP, cSTDP, Monitor, Connection, UpdateRule,
+        RewardModulatedUpdateRule, RegularUpdate, WeightDependent, WeightDependentUpdate,
+        Softbound, RewardModulated, WeightDependentRewardModulated
 
 abstract type SpikingNetwork{T} end
 

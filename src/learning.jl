@@ -4,6 +4,31 @@ function train!(network::SpikingNetwork)
     return
 end
 
+
+function SymmetricalSTDP!(network::SpikingNetwork, learning_rule::Union{STDP,STDPET})
+    learning_rule.e₊ .*= exp(-network.neurons.dt / learning_rule.τ₊)
+    if learning_rule.traces_additive
+        learning_rule.e₊ += learning_rule.A₊ * network.spikes
+    else
+        learning_rule.e₊[network.spikes] .= learning_rule.A₊
+    end
+    learning_rule.e₋ = learning_rule.e₊
+    return
+end
+
+function AsymmetricalSTDP!(network::SpikingNetwork, learning_rule::Union{STDP,STDPET})
+    learning_rule.e₊ .*= exp(-network.neurons.dt / learning_rule.τ₊)
+    learning_rule.e₋ .*= exp(-network.neurons.dt / learning_rule.τ₋)
+    if learning_rule.traces_additive
+        learning_rule.e₊ += learning_rule.A₊ * network.spikes
+        learning_rule.e₋ += learning_rule.A₋ * network.spikes
+    else
+        learning_rule.e₊[network.spikes] .= learning_rule.A₊
+        learning_rule.e₋[network.spikes] .= learning_rule.A₋
+    end
+    return
+end
+
 function train!(network::SpikingNetwork, learning_rule::STDP)
     if learning_rule.τ₊ == learning_rule.τ₋ && learning_rule.A₊ == learning_rule.A₋
         SymmetricalSTDP!(network, learning_rule)
@@ -23,29 +48,26 @@ function train!(network::SpikingNetwork, learning_rule::STDP)
     learning_rule.update_rule(network, weight_update)
 end
 
-
-function SymmetricalSTDP!(network::SpikingNetwork, learning_rule::STDP)
-    learning_rule.e₊ .*= exp(-network.neurons.dt / learning_rule.τ₊)
-    if learning_rule.traces_additive
-        learning_rule.e₊ += learning_rule.A₊ * network.spikes
+function train!(network::SpikingNetwork, learning_rule::STDPET)
+    if learning_rule.τ₊ == learning_rule.τ₋ && learning_rule.A₊ == learning_rule.A₋
+        SymmetricalSTDP!(network, learning_rule)
     else
-        learning_rule.e₊[network.spikes] .= learning_rule.A₊
+        AsymmetricalSTDP!(network, learning_rule)
     end
-    learning_rule.e₋ = learning_rule.e₊
-    return
-end
-
-function AsymmetricalSTDP!(network::SpikingNetwork, learning_rule::STDP)
-    learning_rule.e₊ .*= exp(-network.neurons.dt / learning_rule.τ₊)
-    learning_rule.e₋ .*= exp(-network.neurons.dt / learning_rule.τ₋)
-    if learning_rule.traces_additive
-        learning_rule.e₊ += learning_rule.A₊ * network.spikes
-        learning_rule.e₋ += learning_rule.A₋ * network.spikes
-    else
-        learning_rule.e₊[network.spikes] .= learning_rule.A₊
-        learning_rule.e₋[network.spikes] .= learning_rule.A₋
-    end
-    return
+    s₊ = reshape(network.spikes, network.batch_size, 1, :)
+    e₊ = reshape(learning_rule.e₊, network.batch_size, :, 1)
+    s₋ = reshape(network.spikes, network.batch_size, :, 1)
+    e₋ = reshape(learning_rule.e₋, network.batch_size, 1, :)
+    eligibility_update = fill!(similar(network.learning_rule.eligibility), 0)
+    # Pre-Post activities
+    eligibility_update += ein"bix,bxj->ij"(e₊, s₊)
+    # Post-Pre activities
+    eligibility_update -= ein"bix,bxj->ij"(s₋, e₋)
+    # update eligibility trace
+    network.learning_rule.eligibility .*= exp(-network.neurons.dt / network.learning_rule.τₑ)
+    network.learning_rule.eligibility += eligibility_update
+    # Update weights
+    learning_rule.update_rule(network, network.learning_rule.eligibility)
 end
 
 function train!(network::SpikingNetwork, learning_rule::vSTDP)

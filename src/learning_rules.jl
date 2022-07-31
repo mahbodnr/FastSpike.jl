@@ -37,6 +37,43 @@ function reset!(learning_rule::STDP)
 end
 
 """
+# STDP learning rule with Eligibility trace
+# Arguments
+...
+"""
+@with_kw mutable struct STDPET <: LearningRule
+    A₊::Real
+    A₋::Real
+    τ₊::Real
+    τ₋::Real
+    τₑ::Real = 1000
+    min_weight::Union{Real,AbstractMatrix} = -Inf
+    max_weight::Union{Real,AbstractMatrix} = Inf
+    traces_additive::Bool = false
+    update_rule::UpdateRule = RegularUpdate()
+    e₊::Union{AbstractArray,Nothing} = nothing
+    e₋::Union{AbstractArray,Nothing} = nothing
+    eligibility::Union{AbstractArray,Nothing} = nothing
+end
+
+function add_group!(learning_rule::STDPET, N::Int, batch_size::Int)
+    if isnothing(learning_rule.e₊)
+        learning_rule.e₊ = zeros(Float32, batch_size, 0)
+        learning_rule.e₋ = zeros(Float32, batch_size, 0)
+        learning_rule.eligibility = Array{Float64}(undef, (0, 0))
+    end
+    learning_rule.e₊ = pad1D(learning_rule.e₊, N)
+    learning_rule.e₋ = pad1D(learning_rule.e₋, N)
+    learning_rule.eligibility = pad2D(learning_rule.eligibility, N)
+end
+
+function reset!(learning_rule::STDPET)
+    fill!(learning_rule.e₊, 0)
+    fill!(learning_rule.e₋, 0)
+    fill!(learning_rule.eligibility, 0)
+end
+
+"""
 # Voltage-based STDP
  Voltage-based STDP learning rule. See: https://www.nature.com/articles/nn.2479
 # Arguments
